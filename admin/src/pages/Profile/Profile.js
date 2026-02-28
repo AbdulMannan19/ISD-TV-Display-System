@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabase';
+import { useState, useEffect } from 'react';
+import { supabase } from '../../supabase';
+import './Profile.css';
 
 export default function Profile() {
+  const [email, setEmail] = useState('');
   const [editing, setEditing] = useState(false);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState('');
-  const [email, setEmail] = useState('');
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -22,31 +23,22 @@ export default function Profile() {
     setSaving(true);
     const { error } = await supabase.auth.updateUser({ password });
     setSaving(false);
-    if (error) {
-      setStatus(error.message);
-    } else {
+    if (error) { setStatus(error.message); } else {
       setStatus('Password updated');
-      setEditing(false);
-      setPassword('');
-      setConfirm('');
+      setEditing(false); setPassword(''); setConfirm('');
     }
   };
 
-  const cancelEdit = () => {
-    setEditing(false);
-    setPassword('');
-    setConfirm('');
-    setStatus('');
-  };
+  const cancelEdit = () => { setEditing(false); setPassword(''); setConfirm(''); setStatus(''); };
 
   return (
     <div>
       <h1 className="page-title">Profile</h1>
-      <div className="hadith-display-card" style={{ maxWidth: 480, marginBottom: 20 }}>
-        <div className="hadith-label">Email</div>
-        <div style={{ fontSize: '1rem', color: 'var(--text)' }}>{email}</div>
+      <div className="profile-card">
+        <div className="profile-label">Email</div>
+        <div className="profile-value">{email}</div>
       </div>
-      <div className="hadith-display-card" style={{ maxWidth: 480 }}>
+      <div className="profile-card">
         {editing ? (
           <>
             <div className="form-group" style={{ marginBottom: 12 }}>
@@ -60,18 +52,14 @@ export default function Profile() {
             {status && <div style={{ fontSize: '0.85rem', color: status === 'Password updated' ? 'var(--success)' : 'var(--danger)', marginBottom: 12 }}>{status}</div>}
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button className="btn btn-outline btn-sm" onClick={cancelEdit}>Cancel</button>
-              <button className="btn btn-primary btn-sm" onClick={handleSave} disabled={saving}>
-                {saving ? 'Saving...' : 'Save'}
-              </button>
+              <button className="btn btn-primary btn-sm" onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : 'Save'}</button>
             </div>
           </>
         ) : (
           <>
-            <div className="hadith-label">Password</div>
-            <div style={{ fontSize: '1.1rem', color: 'var(--text)', letterSpacing: 3 }}>••••••••</div>
-            <button className="hadith-edit-btn" onClick={() => setEditing(true)} aria-label="Change password">
-              ✏️
-            </button>
+            <div className="profile-label">Password</div>
+            <div className="profile-value" style={{ letterSpacing: 3 }}>••••••••</div>
+            <button className="profile-edit-btn" onClick={() => setEditing(true)} aria-label="Change password">✏️</button>
           </>
         )}
       </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { supabase } from '../supabase';
+import { supabase } from '../../supabase';
+import './Login.css';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -32,7 +33,7 @@ export default function Login() {
         <button className="btn-primary" type="submit" disabled={loading}>
           {loading ? 'Signing in...' : 'Sign In'}
         </button>
-        {error && <div className="error">{error}</div>}
+        {error && <div className="login-error">{error}</div>}
       </form>
     </div>
   );
