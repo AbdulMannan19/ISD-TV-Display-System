@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, NavLink } from 'react-router-dom';
 import { supabase } from './supabase';
 import Login from './pages/Login';
-import PrayerTimes from './pages/PrayerTimes';
 import Slides from './pages/Slides';
-import DailyInfo from './pages/DailyInfo';
+import Hadiths from './pages/Hadiths';
+import Profile from './pages/Profile';
 import './App.css';
 
 export default function App() {
@@ -31,17 +31,17 @@ export default function App() {
       <div className="app">
         <nav className="nav">
           <span className="nav-title">Masjid Admin</span>
-          <NavLink to="/prayer-times">Prayer Times</NavLink>
-          <NavLink to="/daily-info">Daily Info</NavLink>
           <NavLink to="/slides">Slides</NavLink>
+          <NavLink to="/hadiths">Hadiths</NavLink>
+          <NavLink to="/profile">Profile</NavLink>
           <button onClick={() => supabase.auth.signOut()}>Logout</button>
         </nav>
         <main className="main">
           <Routes>
-            <Route path="/prayer-times" element={<PrayerTimes />} />
-            <Route path="/daily-info" element={<DailyInfo />} />
             <Route path="/slides" element={<Slides />} />
-            <Route path="*" element={<Navigate to="/prayer-times" />} />
+            <Route path="/hadiths" element={<Hadiths />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="*" element={<Navigate to="/slides" />} />
           </Routes>
         </main>
       </div>
