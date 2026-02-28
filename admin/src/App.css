@@ -18,10 +18,10 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; }
 .loading { display: flex; justify-content: center; align-items: center; height: 100vh; color: var(--text-muted); }
 .app { display: flex; min-height: 100vh; }
-.main { margin-left: 240px; flex: 1; padding: 32px 40px; margin-top: 56px; }
+.main { margin-left: 240px; flex: 1; padding: 32px 40px; margin-top: 64px; }
 
 .page-title {
   font-size: 1.6rem; font-weight: 700; margin-bottom: 24px;

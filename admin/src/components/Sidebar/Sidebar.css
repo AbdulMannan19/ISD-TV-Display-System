@@ -1,7 +1,7 @@
 .sidebar {
   width: 240px; background: var(--surface); border-right: 1px solid var(--border);
   display: flex; flex-direction: column; padding: 16px;
-  position: fixed; top: 56px; left: 0; bottom: 0;
+  position: fixed; top: 64px; left: 0; bottom: 0;
 }
 .sidebar a {
   display: flex; align-items: center; gap: 10px; text-decoration: none;

@@ -83,7 +83,6 @@ export default function Slides() {
   return (
     <div>
       <h1 className="page-title">Slides</h1>
-      <div className="slides-note">PNG or JPEG, 1920×1080px (Full HD), max 2MB per image.</div>
 
       {slides.map((slide, i) => (
         <div
