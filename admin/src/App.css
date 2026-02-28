@@ -1,0 +1,34 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #333; }
+.loading { display: flex; justify-content: center; align-items: center; height: 100vh; font-size: 1.2rem; }
+.app { max-width: 800px; margin: 0 auto; padding: 20px; }
+.nav { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid #ddd; margin-bottom: 24px; }
+.nav-title { font-weight: 700; font-size: 1.1rem; margin-right: auto; }
+.nav a { text-decoration: none; color: #555; padding: 6px 12px; border-radius: 6px; }
+.nav a.active { background: #2563eb; color: #fff; }
+.nav button { background: none; border: 1px solid #ddd; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+
+.login { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 12px; }
+.login input { padding: 10px; width: 280px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
+.login button { padding: 10px 24px; background: #2563eb; color: #fff; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+.login .error { color: #dc2626; font-size: 0.9rem; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group label { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; color: #666; }
+.form-group input { padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
+.form-full { grid-column: 1 / -1; }
+
+.save-btn { margin-top: 16px; padding: 10px 32px; background: #2563eb; color: #fff; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+.save-btn:disabled { opacity: 0.5; }
+.status { margin-top: 8px; font-size: 0.9rem; color: #16a34a; }
+
+.slide-card { display: flex; align-items: center; gap: 12px; padding: 12px; background: #fff; border-radius: 8px; margin-bottom: 8px; border: 1px solid #ddd; }
+.slide-card img { width: 120px; height: 68px; object-fit: cover; border-radius: 4px; }
+.slide-card .slide-info { flex: 1; }
+.slide-card .slide-actions { display: flex; gap: 8px; }
+.slide-card button { padding: 4px 10px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; background: #fff; }
+.slide-card button.delete { color: #dc2626; border-color: #dc2626; }
+
+.upload-area { margin-bottom: 16px; }
+.upload-area input[type="file"] { margin-right: 8px; }
