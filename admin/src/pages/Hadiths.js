@@ -3,66 +3,70 @@ import { supabase } from '../supabase';
 
 export default function Hadiths() {
   const [hadiths, setHadiths] = useState([]);
-  const [text, setText] = useState('');
-  const [source, setSource] = useState('');
+  const [editing, setEditing] = useState(null);
+  const [draft, setDraft] = useState({ text: '', source: '' });
+  const [saving, setSaving] = useState(false);
 
-  const fetchHadiths = async () => {
-    const { data } = await supabase.from('hadiths').select('*').order('id');
-    if (data) setHadiths(data);
+  useEffect(() => {
+    supabase.from('hadiths').select('*').order('id').then(({ data }) => {
+      if (data) setHadiths(data);
+    });
+  }, []);
+
+  const startEdit = (h) => {
+    setEditing(h.id);
+    setDraft({ text: h.text, source: h.source });
   };
 
-  useEffect(() => { fetchHadiths(); }, []);
-
-  const handleAdd = async (e) => {
-    e.preventDefault();
-    if (!text.trim() || !source.trim()) return;
-    await supabase.from('hadiths').insert({ text: text.trim(), source: source.trim() });
-    setText('');
-    setSource('');
-    fetchHadiths();
+  const cancelEdit = () => {
+    setEditing(null);
+    setDraft({ text: '', source: '' });
   };
 
-  const toggleActive = async (h) => {
-    await supabase.from('hadiths').update({ is_active: !h.is_active }).eq('id', h.id);
-    fetchHadiths();
-  };
-
-  const deleteHadith = async (h) => {
-    await supabase.from('hadiths').delete().eq('id', h.id);
-    fetchHadiths();
+  const handleSave = async (id) => {
+    setSaving(true);
+    await supabase.from('hadiths').update({ text: draft.text, source: draft.source }).eq('id', id);
+    setHadiths(prev => prev.map(h => h.id === id ? { ...h, ...draft } : h));
+    setEditing(null);
+    setSaving(false);
   };
 
   return (
     <div>
-      <h2>Hadiths</h2>
-      <form onSubmit={handleAdd} style={{ marginTop: 16, marginBottom: 20 }}>
-        <div className="form-grid">
-          <div className="form-group form-full">
-            <label>Hadith Text</label>
-            <textarea value={text} onChange={e => setText(e.target.value)} rows={3} style={{ padding: 8, border: '1px solid #ddd', borderRadius: 6, fontSize: '1rem', resize: 'vertical' }} required />
+      <h1 className="page-title">Hadith of the Day</h1>
+      <div style={{ display: 'grid', gap: 20 }}>
+        {hadiths.map(h => (
+          <div className="hadith-display-card" key={h.id}>
+            {editing === h.id ? (
+              <>
+                <div className="form-group" style={{ marginBottom: 12 }}>
+                  <label>Text</label>
+                  <textarea rows={4} value={draft.text} onChange={e => setDraft({ ...draft, text: e.target.value })} />
+                </div>
+                <div className="form-group" style={{ marginBottom: 16 }}>
+                  <label>Source</label>
+                  <input type="text" value={draft.source} onChange={e => setDraft({ ...draft, source: e.target.value })} />
+                </div>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                  <button className="btn btn-outline btn-sm" onClick={cancelEdit}>Cancel</button>
+                  <button className="btn btn-primary btn-sm" onClick={() => handleSave(h.id)} disabled={saving}>
+                    {saving ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="hadith-label">Hadith {h.id}</div>
+                <div className="hadith-display-text">"{h.text}"</div>
+                <div className="hadith-display-source">— {h.source}</div>
+                <button className="hadith-edit-btn" onClick={() => startEdit(h)} aria-label="Edit hadith">
+                  ✏️
+                </button>
+              </>
+            )}
           </div>
-          <div className="form-group">
-            <label>Source</label>
-            <input type="text" value={source} onChange={e => setSource(e.target.value)} placeholder="e.g. Tirmidhi" required />
-          </div>
-          <div className="form-group" style={{ justifyContent: 'flex-end' }}>
-            <button className="save-btn" type="submit" style={{ margin: 0 }}>Add Hadith</button>
-          </div>
-        </div>
-      </form>
-      {hadiths.map(h => (
-        <div className="slide-card" key={h.id} style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-          <div style={{ fontSize: '0.95rem' }}>"{h.text}"</div>
-          <div style={{ fontSize: '0.85rem', color: '#666', marginTop: 4 }}>— {h.source}</div>
-          <div className="slide-actions" style={{ marginTop: 8 }}>
-            <button onClick={() => toggleActive(h)}>
-              {h.is_active ? 'Disable' : 'Enable'}
-            </button>
-            <button className="delete" onClick={() => deleteHadith(h)}>Delete</button>
-          </div>
-        </div>
-      ))}
-      {hadiths.length === 0 && <p>No hadiths yet. Add one above.</p>}
+        ))}
+      </div>
     </div>
   );
 }

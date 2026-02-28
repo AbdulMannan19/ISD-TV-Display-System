@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, NavLink } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, NavLink, Link } from 'react-router-dom';
 import { supabase } from './supabase';
 import Login from './pages/Login';
 import Slides from './pages/Slides';
@@ -23,19 +23,22 @@ export default function App() {
   }, []);
 
   if (loading) return <div className="loading">Loading...</div>;
-
   if (!session) return <Login />;
 
   return (
     <BrowserRouter>
       <div className="app">
-        <nav className="nav">
-          <span className="nav-title">Masjid Admin</span>
-          <NavLink to="/slides">Slides</NavLink>
-          <NavLink to="/hadiths">Hadiths</NavLink>
-          <NavLink to="/profile">Profile</NavLink>
-          <button onClick={() => supabase.auth.signOut()}>Logout</button>
-        </nav>
+        <div className="topbar">
+          <div className="topbar-title">🕌 Islamic Society of Denton</div>
+          <Link to="/profile" className="topbar-profile" aria-label="Profile">👤</Link>
+        </div>
+        <aside className="sidebar">
+          <NavLink to="/slides">🖼️ Slides</NavLink>
+          <NavLink to="/hadiths">📖 Hadiths</NavLink>
+          <div className="sidebar-bottom">
+            <button onClick={() => supabase.auth.signOut()}>Sign Out</button>
+          </div>
+        </aside>
         <main className="main">
           <Routes>
             <Route path="/slides" element={<Slides />} />
