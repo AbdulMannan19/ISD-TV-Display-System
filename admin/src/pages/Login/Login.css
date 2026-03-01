@@ -43,14 +43,10 @@
 }
 .login-brand-sub { color: var(--text-muted); font-size: 0.875rem; margin-top: 6px; }
 
-/* Form inputs with icons */
+/* Form inputs */
 .input-with-icon { position: relative; }
-.input-with-icon .input-icon {
-  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-  color: var(--text-muted); display: flex; pointer-events: none;
-}
 .input-with-icon input {
-  width: 100%; padding: 12px 14px 12px 40px;
+  width: 100%; padding: 12px 14px;
   background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm);
   color: var(--text); font-size: 0.95rem; font-family: inherit; transition: all 0.15s;
 }
