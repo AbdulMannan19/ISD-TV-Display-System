@@ -1,11 +1,14 @@
 cd admin
 npm install
+clear
 npm start
 
 git status
 git add .
 git commit -m "quick commit"
 git push
+clear
+
 
 
 To Do
