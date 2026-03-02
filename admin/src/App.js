@@ -5,7 +5,6 @@ import Topbar from './components/Topbar/Topbar';
 import Sidebar from './components/Sidebar/Sidebar';
 import Login from './pages/Login/Login';
 import Slides from './pages/Slides/Slides';
-import Hadiths from './pages/Hadiths/Hadiths';
 import Profile from './pages/Profile/Profile';
 import './App.css';
 
@@ -37,10 +36,9 @@ export default function App() {
         <Topbar collapsed={collapsed} email={email} />
         <main className={`main${collapsed ? ' collapsed' : ''}`}>
           <Routes>
-            <Route path="/hadiths" element={<Hadiths />} />
             <Route path="/slides" element={<Slides />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="*" element={<Navigate to="/hadiths" />} />
+            <Route path="*" element={<Navigate to="/slides" />} />
           </Routes>
         </main>
       </div>

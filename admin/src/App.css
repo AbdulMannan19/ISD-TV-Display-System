@@ -130,12 +130,3 @@ body {
 }
 .modal-close:hover { color: var(--text); background: #f3f4f6; }
 
-/* Add form card (shared between hadiths and slides) */
-.add-form-card {
-  background: var(--green-bg); border: 2px dashed var(--green-border);
-  border-radius: var(--radius); padding: 24px; margin-bottom: 24px;
-}
-.add-form-card h3 {
-  font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.8px; color: var(--green); margin-bottom: 16px;
-}
