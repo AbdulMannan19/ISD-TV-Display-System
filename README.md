@@ -3,6 +3,10 @@ npm install
 clear
 npm start
 
+cd display
+flutter run -d chrome
+
+
 git status
 git add .
 git commit -m "quick commit"
