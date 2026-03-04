@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:async';
 import 'screens/prayer_times_screen.dart';
 import 'screens/hadith_screen.dart';
+import 'screens/slides_screen.dart';
 import 'services/hadith_service.dart';
 import 'utils/test_controls.dart'; // TODO: Remove in production
 
@@ -61,6 +62,7 @@ class _ScreenRotatorState extends State<ScreenRotator> {
   final List<Widget> _screens = const [
     PrayerTimesScreen(),
     HadithScreen(),
+    SlidesScreen(),
   ];
 
   @override
@@ -107,7 +109,11 @@ class _ScreenRotatorState extends State<ScreenRotator> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        _screens[_currentIndex],
+        // Use IndexedStack to keep all screens mounted and loaded
+        IndexedStack(
+          index: _currentIndex,
+          children: _screens,
+        ),
         
         // TODO: Remove TestControls in production
         TestControls(
