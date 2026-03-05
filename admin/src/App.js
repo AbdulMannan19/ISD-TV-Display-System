@@ -9,11 +9,15 @@ import Slides from './pages/Slides/Slides';
 import Profile from './pages/Profile/Profile';
 import './App.css';
 
+// Check hash ONCE at page load, before React even renders
+const hash = window.location.hash;
+const isInvite = hash.includes('type=invite') || hash.includes('type=recovery');
+
 function AppContent() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
-  const [needsPassword, setNeedsPassword] = useState(false);
+  const [needsPassword, setNeedsPassword] = useState(isInvite);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -21,14 +25,9 @@ function AppContent() {
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setLoading(false);
-
-      const hash = window.location.hash;
-      if (hash.includes('type=invite') || hash.includes('type=recovery')) {
-        setNeedsPassword(true);
-      }
     });
 
     return () => subscription.unsubscribe();
@@ -36,15 +35,12 @@ function AppContent() {
 
   if (loading) return <div className="loading">Loading...</div>;
 
-  // User just came from invite link, has session but needs to set password
   if (needsPassword && session) {
     return <SetPassword onDone={() => { setNeedsPassword(false); window.location.hash = ''; }} />;
   }
 
-  // No session and hash has invite params = Supabase is still processing the redirect
   if (!session) {
-    const hash = window.location.hash;
-    if (hash.includes('access_token') && (hash.includes('type=invite') || hash.includes('type=recovery'))) {
+    if (isInvite) {
       return <div className="loading">Processing invitation...</div>;
     }
     return <Login />;
