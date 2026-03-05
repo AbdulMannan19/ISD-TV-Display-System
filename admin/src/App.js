@@ -5,6 +5,7 @@ import Topbar from './components/Topbar/Topbar';
 import Sidebar from './components/Sidebar/Sidebar';
 import Login from './pages/Login/Login';
 import Slides from './pages/Slides/Slides';
+import PrayerTimes from './pages/PrayerTimes/PrayerTimes';
 import Profile from './pages/Profile/Profile';
 import './App.css';
 
@@ -36,6 +37,7 @@ function AppContent() {
       <main className={`main${collapsed ? ' collapsed' : ''}`}>
         <Routes>
           <Route path="/slides" element={<Slides />} />
+          <Route path="/prayer-times" element={<PrayerTimes />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<Navigate to="/slides" />} />
         </Routes>
