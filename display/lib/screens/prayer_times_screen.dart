@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/prayer_times_service.dart';
 
 class PrayerTimesScreen extends StatefulWidget {
@@ -13,6 +14,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   late Timer _timer;
   late DateTime _now;
   final PrayerTimesService _prayerService = PrayerTimesService();
+  StreamSubscription? _iqamahSubscription;
 
   List<Map<String, String>> prayers = [];
   String sunrise = '6:59 AM';
@@ -29,6 +31,16 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
       setState(() => _now = DateTime.now());
     });
     _loadPrayerTimes();
+    _listenToIqamahChanges();
+  }
+
+  void _listenToIqamahChanges() {
+    _iqamahSubscription = Supabase.instance.client
+        .from('prayer_times')
+        .stream(primaryKey: ['prayer'])
+        .listen((_) {
+          if (mounted) _loadPrayerTimes();
+        });
   }
 
   Future<void> _loadPrayerTimes() async {
@@ -52,6 +64,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   @override
   void dispose() {
     _timer.cancel();
+    _iqamahSubscription?.cancel();
     super.dispose();
   }
 

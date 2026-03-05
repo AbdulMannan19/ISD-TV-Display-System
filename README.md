@@ -3,6 +3,9 @@ npm install
 clear
 npm start
 
+cd admin
+npm start
+
 cd display
 flutter run -d windows
 
