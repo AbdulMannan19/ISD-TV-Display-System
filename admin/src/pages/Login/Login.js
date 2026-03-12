@@ -35,6 +35,10 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -43,6 +47,28 @@ export default function Login() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) setError(error.message);
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setError('');
+    setResetLoading(true);
+    
+    console.log('[Forgot Password] Sending reset email to:', resetEmail);
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: 'https://isd-tv-display-system.vercel.app',
+    });
+    
+    setResetLoading(false);
+    
+    if (error) {
+      console.error('[Forgot Password] Error:', error);
+      setError(error.message);
+    } else {
+      console.log('[Forgot Password] Reset email sent successfully');
+      setResetSent(true);
+    }
   };
 
   return (
@@ -97,10 +123,61 @@ export default function Login() {
               ) : 'Sign In'}
             </button>
             {error && <div className="login-error">{error}</div>}
+            
+            <button
+              type="button"
+              className="forgot-password-link"
+              onClick={() => setShowForgotPassword(true)}
+            >
+              Forgot password?
+            </button>
           </form>
 
           <p className="login-footer">Managed by Islamic Society of Denton</p>
         </div>
+
+        {showForgotPassword && (
+          <div className="modal-overlay" onClick={() => { setShowForgotPassword(false); setResetSent(false); setError(''); }}>
+            <div className="modal-card" onClick={e => e.stopPropagation()}>
+              <div className="modal-header">
+                <span>Reset Password</span>
+                <button className="modal-close" onClick={() => { setShowForgotPassword(false); setResetSent(false); setError(''); }}>✕</button>
+              </div>
+              
+              {resetSent ? (
+                <div className="reset-success">
+                  <p>Check your email for a password reset link.</p>
+                  <button className="btn btn-green" onClick={() => { setShowForgotPassword(false); setResetSent(false); }}>
+                    Close
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleForgotPassword}>
+                  <p className="reset-instructions">Enter your email address and we'll send you a link to reset your password.</p>
+                  <div className="form-group">
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      value={resetEmail}
+                      onChange={e => setResetEmail(e.target.value)}
+                      placeholder="your@email.com"
+                      required
+                    />
+                  </div>
+                  {error && <div className="login-error">{error}</div>}
+                  <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+                    <button className="btn btn-green" type="submit" disabled={resetLoading}>
+                      {resetLoading ? 'Sending...' : 'Send Reset Link'}
+                    </button>
+                    <button className="btn btn-outline" type="button" onClick={() => { setShowForgotPassword(false); setError(''); }}>
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,118 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../supabase';
+import './UpdatePassword.css';
+
+export default function UpdatePassword({ onComplete }) {
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    console.log('[UpdatePassword] Validating password...');
+
+    if (password.length < 6) {
+      console.error('[UpdatePassword] Password too short');
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      console.error('[UpdatePassword] Passwords do not match');
+      setError('Passwords do not match');
+      return;
+    }
+
+    console.log('[UpdatePassword] Updating password...');
+    setLoading(true);
+    
+    const { error } = await supabase.auth.updateUser({ password });
+
+    if (error) {
+      console.error('[UpdatePassword] Error updating password:', error);
+      setError(error.message);
+      setLoading(false);
+    } else {
+      console.log('[UpdatePassword] Password updated successfully');
+      window.location.hash = '';
+      if (onComplete) onComplete();
+      navigate('/profile');
+    }
+  };
+
+  return (
+    <div className="update-password-page">
+      <div className="update-password-left">
+        <div className="update-password-pattern"></div>
+        <div className="update-password-quote">
+          <p>"Indeed, the first House [of worship] established for mankind was that at Makkah – blessed and a guidance for the worlds."</p>
+          <span>— Quran 3:96</span>
+        </div>
+      </div>
+
+      <div className="update-password-right">
+        <div className="update-password-card">
+          <div className="update-password-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M12 3C12 3 8 6 8 10V20H16V10C16 6 12 3 12 3Z" />
+              <path d="M4 20V14C4 12 5 11 6 10.5" />
+              <path d="M20 20V14C20 12 19 11 18 10.5" />
+              <path d="M2 20H22" />
+              <circle cx="12" cy="10" r="1.5" />
+            </svg>
+          </div>
+
+          <h1>Islamic Society of Denton</h1>
+          <p className="update-password-subtitle">Set your new password</p>
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>NEW PASSWORD</label>
+              <div className="password-input-wrapper">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your new password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="toggle-password"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? '👁️' : '👁️‍🗨️'}
+                </button>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>CONFIRM PASSWORD</label>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm your new password"
+                required
+              />
+            </div>
+
+            {error && <div className="error-message">{error}</div>}
+
+            <button type="submit" className="btn-submit" disabled={loading}>
+              {loading ? 'Updating Password...' : 'Update Password'}
+            </button>
+          </form>
+
+          <p className="update-password-footer">Managed by Islamic Society of Denton</p>
+        </div>
+      </div>
+    </div>
+  );
+}
