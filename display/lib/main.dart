@@ -320,15 +320,30 @@ class _ScreenRotatorState extends State<ScreenRotator> {
 
   void _testSilence() {
     setState(() {
-      _inSilenceMode = true;
-      _silenceEndTime = DateTime.now().add(const Duration(seconds: 30));
+      _inSilenceMode = !_inSilenceMode;
+      _inProhibitedMode = false;
+      if (_inSilenceMode) {
+        _silenceEndTime = DateTime.now().add(const Duration(hours: 1));
+      }
     });
   }
 
   void _testProhibited() {
     setState(() {
-      _inProhibitedMode = true;
-      _prohibitedEndTime = DateTime.now().add(const Duration(seconds: 30));
+      _inProhibitedMode = !_inProhibitedMode;
+      _inSilenceMode = false;
+      if (_inProhibitedMode) {
+        _prohibitedEndTime = DateTime.now().add(const Duration(minutes: 15));
+      }
+    });
+  }
+
+  void _exitSpecialScreen() {
+    setState(() {
+      _inSilenceMode = false;
+      _inProhibitedMode = false;
+      _silenceEndTime = null;
+      _prohibitedEndTime = null;
     });
   }
 
@@ -364,6 +379,7 @@ class _ScreenRotatorState extends State<ScreenRotator> {
           onNext: _goToNext,
           onTestSilence: _testSilence,
           onTestProhibited: _testProhibited,
+          onExit: _exitSpecialScreen,
         ),
       ],
     );
