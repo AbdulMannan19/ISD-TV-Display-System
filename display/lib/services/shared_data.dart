@@ -92,7 +92,7 @@ class SharedData {
       if (_nextIqamahTarget == null) return '--';
     }
 
-    final totalMin = _nextIqamahTarget!.difference(now).inMinutes;
+    final totalMin = _nextIqamahTarget!.difference(now).inMinutes + 1;
     if (totalMin >= 60) {
       final hrs = totalMin ~/ 60;
       final mins = totalMin % 60;
