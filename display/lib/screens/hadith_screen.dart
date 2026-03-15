@@ -162,6 +162,9 @@ class _HadithScreenState extends State<HadithScreen> {
             const SizedBox(height: 4),
             Text(_formatDate(_now), textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 10, letterSpacing: 0.5)),
+            if (SharedData.instance.hijriDate.isNotEmpty)
+              Text(SharedData.instance.hijriDate, textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 10, letterSpacing: 0.5)),
           ]),
           Column(children: [
             Text(_formatTime(_now),
@@ -205,9 +208,9 @@ class _HadithScreenState extends State<HadithScreen> {
           _prayerBarHeader(),
           const SizedBox(width: 16),
           ...shared.prayers.map((p) => Expanded(child: _prayerBarItem(p))),
-          if (shared.jummah1.isNotEmpty) ...[
+          if (shared.jummah.isNotEmpty) ...[
             Container(width: 1, height: 44, color: Colors.white24, margin: const EdgeInsets.symmetric(horizontal: 10)),
-            _jumuahBarItem(shared.jummah1, shared.jummah2),
+            _jumuahBarItem(shared.jummah),
           ],
         ],
       ),
@@ -238,22 +241,12 @@ class _HadithScreenState extends State<HadithScreen> {
     );
   }
 
-  Widget _jumuahBarItem(String j1, String j2) {
+  Widget _jumuahBarItem(String time) {
     return Column(
       children: [
         const Text("JUMU'AH", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1)),
         const SizedBox(height: 4),
-        Row(children: [
-          Column(children: [
-            Text('1st', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 9)),
-            Text(j1, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
-          ]),
-          const SizedBox(width: 14),
-          Column(children: [
-            Text('2nd', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 9)),
-            Text(j2, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
-          ]),
-        ]),
+        Text(time, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
       ],
     );
   }

@@ -17,8 +17,6 @@ const SaveIcon = () => (
 
 const PRAYERS = ['fajr', 'zuhr', 'asr', 'maghrib', 'isha'];
 const LABELS = { fajr: 'Fajr', zuhr: 'Dhuhr', asr: 'Asr', maghrib: 'Maghrib', isha: 'Isha' };
-const JUMMAH = ['jummah1', 'jummah2'];
-const JUMMAH_LABELS = { jummah1: "Jumu'ah 1", jummah2: "Jumu'ah 2" };
 const NON_EDITABLE = ['maghrib'];
 
 export default function PrayerTimes() {
@@ -138,19 +136,17 @@ export default function PrayerTimes() {
             </tr>
           </thead>
           <tbody>
-            {JUMMAH.map(j => (
-              <tr key={j}>
-                <td className="pt-prayer-name">{JUMMAH_LABELS[j]}</td>
-                <td className="pt-time">
-                  <input
-                    type="time"
-                    value={editing[j] || ''}
-                    onChange={e => setEditing({ ...editing, [j]: e.target.value })}
-                    className="pt-input"
-                  />
-                </td>
-              </tr>
-            ))}
+            <tr>
+              <td className="pt-prayer-name">Jumu'ah</td>
+              <td className="pt-time">
+                <input
+                  type="time"
+                  value={editing['jummah'] || ''}
+                  onChange={e => setEditing({ ...editing, jummah: e.target.value })}
+                  className="pt-input"
+                />
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>

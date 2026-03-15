@@ -7,46 +7,37 @@ class SharedData {
 
   String sunrise = '';
   String sunset = '';
-  String jummah1 = '';
-  String jummah2 = '';
+  String jummah = '';
+  String hijriDate = '';
   List<Map<String, String>> prayers = [];
   DateTime? _nextIqamahTarget;
   List<DateTime> _iqamahDateTimes = [];
 
   Future<void> init() async {
-    final service = PrayerTimesService();
-    final data = await service.fetchPrayerTimes();
-    if (data != null) {
-      sunrise = data['sunrise'] as String;
-      sunset = data['sunset'] as String;
-      jummah1 = data['jummah1'] as String;
-      jummah2 = data['jummah2'] as String;
-      prayers = (data['prayers'] as List).map((p) => {
-        'name': p['name'] as String,
-        'adhan': p['adhan'] as String,
-        'iqamah': p['iqamah'] as String,
-      }).toList();
-    }
+    await _fetchAll();
     await _loadIqamahTimes();
     _computeNextTarget();
   }
 
   Future<void> refreshIqamah() async {
-    final service = PrayerTimesService();
-    final data = await service.fetchPrayerTimes();
-    if (data != null) {
-      sunrise = data['sunrise'] as String;
-      sunset = data['sunset'] as String;
-      jummah1 = data['jummah1'] as String;
-      jummah2 = data['jummah2'] as String;
-      prayers = (data['prayers'] as List).map((p) => {
-        'name': p['name'] as String,
-        'adhan': p['adhan'] as String,
-        'iqamah': p['iqamah'] as String,
-      }).toList();
-    }
+    await _fetchAll();
     await _loadIqamahTimes();
     _computeNextTarget();
+  }
+
+  Future<void> _fetchAll() async {
+    final service = PrayerTimesService();
+    final data = await service.fetchPrayerTimes();
+    if (data == null) return;
+    sunrise = data['sunrise'] as String;
+    sunset = data['sunset'] as String;
+    jummah = data['jummah'] as String;
+    hijriDate = data['hijriDate'] as String;
+    prayers = (data['prayers'] as List).map((p) => {
+      'name': p['name'] as String,
+      'adhan': p['adhan'] as String,
+      'iqamah': p['iqamah'] as String,
+    }).toList();
   }
 
   Future<void> _loadIqamahTimes() async {
@@ -76,22 +67,18 @@ class SharedData {
         return;
       }
     }
-    // All passed today — wrap to first iqamah (Fajr) tomorrow
     if (_iqamahDateTimes.isNotEmpty) {
-      final first = _iqamahDateTimes.first;
-      _nextIqamahTarget = first.add(const Duration(days: 1));
+      _nextIqamahTarget = _iqamahDateTimes.first.add(const Duration(days: 1));
     }
   }
 
   String getCountdown() {
     if (_nextIqamahTarget == null) return '--';
-
     final now = DateTime.now();
     if (now.isAfter(_nextIqamahTarget!)) {
       _computeNextTarget();
       if (_nextIqamahTarget == null) return '--';
     }
-
     final totalMin = _nextIqamahTarget!.difference(now).inMinutes + 1;
     if (totalMin >= 60) {
       final hrs = totalMin ~/ 60;

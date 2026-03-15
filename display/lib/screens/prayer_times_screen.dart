@@ -20,8 +20,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   List<Map<String, String>> prayers = [];
   String sunrise = '';
   String sunset = '';
-  String jummah1 = '1:45 PM';
-  String jummah2 = '1:45 PM';
+  String jummah = '1:45 PM';
   bool isLoading = true;
 
   @override
@@ -59,8 +58,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           'iqamah': newIqamah ?? p['iqamah']!,
         };
       }).toList();
-      if (iqamah.containsKey('jummah1')) jummah1 = iqamah['jummah1']!;
-      if (iqamah.containsKey('jummah2')) jummah2 = iqamah['jummah2']!;
+      if (iqamah.containsKey('jummah')) jummah = iqamah['jummah']!;
     });
   }
 
@@ -75,8 +73,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         }).toList();
         sunrise = data['sunrise'] as String;
         sunset = data['sunset'] as String;
-        jummah1 = data['jummah1'] as String;
-        jummah2 = data['jummah2'] as String;
+        jummah = data['jummah'] as String;
         isLoading = false;
       });
     }
@@ -216,7 +213,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               border: Border.all(color: Colors.white24),
             ),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            child: Column(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
                   "JUMU'AH",
@@ -227,14 +225,14 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                     letterSpacing: 3,
                   ),
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _jumuahCol("JUMU'AH 1", jummah1),
-                    Container(width: 1, height: 36, color: Colors.white30),
-                    _jumuahCol("JUMU'AH 2", jummah2),
-                  ],
+                const SizedBox(width: 20),
+                Text(
+                  jummah,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -294,30 +292,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     );
   }
 
-  Widget _jumuahCol(String label, String time) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.55),
-            fontSize: 10,
-            letterSpacing: 1,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          time,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildRightPanel() {
     return Container(
       decoration: BoxDecoration(
@@ -355,6 +329,14 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   fontSize: 12,
                 ),
               ),
+              if (SharedData.instance.hijriDate.isNotEmpty)
+                Text(
+                  SharedData.instance.hijriDate,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.4),
+                    fontSize: 11,
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 16),

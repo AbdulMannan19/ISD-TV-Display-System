@@ -27,6 +27,11 @@ class PrayerTimesService {
 
       final timings = data['data']['timings'] as Map<String, dynamic>;
       final date = data['data']['date']['readable'] as String;
+      final hijri = data['data']['date']['hijri'] as Map<String, dynamic>;
+      final hijriDay = hijri['day'] as String;
+      final hijriMonth = (hijri['month'] as Map<String, dynamic>)['en'] as String;
+      final hijriYear = hijri['year'] as String;
+      final hijriDate = '$hijriMonth $hijriDay, $hijriYear';
 
       final fajrAdhan = _cleanTime(timings['Fajr']);
       final dhuhrAdhan = _cleanTime(timings['Dhuhr']);
@@ -43,8 +48,7 @@ class PrayerTimesService {
       final dhuhrIqamah = iqamahTimes['zuhr'] ?? _addMinutes(dhuhrAdhan, 19);
       final asrIqamah = iqamahTimes['asr'] ?? _addMinutes(asrAdhan, 19);
       final ishaIqamah = iqamahTimes['isha'] ?? _addMinutes(ishaAdhan, 28);
-      final jummah1 = iqamahTimes['jummah1'] ?? '1:45 PM';
-      final jummah2 = iqamahTimes['jummah2'] ?? '1:45 PM';
+      final jummah1 = iqamahTimes['jummah'] ?? '1:45 PM';
 
       // Push adhan times + maghrib iqamah to DB
       await _updateDbTimes(
@@ -63,8 +67,8 @@ class PrayerTimesService {
         ],
         'sunrise': _to12(sunrise),
         'sunset': _to12(maghribAdhan),
-        'jummah1': jummah1,
-        'jummah2': jummah2,
+        'jummah': jummah1,
+        'hijriDate': hijriDate,
       };
     } catch (e) {
       print('Error fetching prayer times: $e');
