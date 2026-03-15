@@ -227,14 +227,15 @@ class _ScreenRotatorState extends State<ScreenRotator> {
     try {
       final response = await Supabase.instance.client
           .from('prayer_times')
-          .select('iqamah');
+          .select('prayer, iqamah');
       
       final times = <String>[];
       for (final row in response as List) {
+        final prayer = row['prayer'] as String;
+        if (prayer.startsWith('jummah')) continue;
         times.add(row['iqamah'] as String);
       }
       setState(() => _iqamahTimes = times);
-      // Refresh shared countdown data
       await SharedData.instance.refreshIqamah();
     } catch (e) {
       print('Error fetching iqamah times: $e');
