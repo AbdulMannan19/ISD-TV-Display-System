@@ -15,6 +15,7 @@ import 'services/dua_service.dart';
 import 'services/verse_service.dart';
 import 'services/slides_service.dart';
 import 'services/prayer_times_service.dart';
+import 'services/update_service.dart';
 import 'test/test_controls.dart';
 
 Future<void> main() async {
@@ -42,6 +43,10 @@ Future<void> main() async {
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
+  
+  // Check for app updates (Android only, non-blocking)
+  UpdateService.checkForUpdate();
+  
   runApp(const DisplayApp());
 }
 

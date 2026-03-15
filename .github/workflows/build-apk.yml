@@ -1,0 +1,44 @@
+name: Build & Release APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'display/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: stable
+
+      - name: Create .env
+        run: |
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" > display/.env
+          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> display/.env
+
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: display
+
+      - name: Build APK
+        run: flutter build apk --release
+        working-directory: display
+
+      - name: Get version
+        id: version
+        run: echo "tag=v$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Display ${{ steps.version.outputs.tag }}
+          files: display/build/app/outputs/flutter-apk/app-release.apk
