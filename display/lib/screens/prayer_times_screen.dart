@@ -306,6 +306,20 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           Column(
             children: [
               Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.asset('assets/images/qr_code.jpeg', fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.qr_code_2, size: 50, color: Colors.black54))),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.white38),
@@ -395,7 +409,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           style: const TextStyle(
             color: Colors.white,
             fontSize: 46,
-            fontWeight: FontWeight.w200,
+            fontWeight: FontWeight.w700,
             letterSpacing: -1,
           ),
         ),
