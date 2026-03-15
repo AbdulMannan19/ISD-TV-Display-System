@@ -168,7 +168,7 @@ class _VerseScreenState extends State<VerseScreen> {
           ]),
           Column(children: [
             Text(_formatTime(_now),
-              style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w600, letterSpacing: -1)),
+              style: const TextStyle(color: Colors.white, fontSize: 48, fontWeight: FontWeight.w600, letterSpacing: -1)),
             const SizedBox(height: 8),
             Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
               _sunInfo('☀️', 'SUNRISE', shared.sunrise),
