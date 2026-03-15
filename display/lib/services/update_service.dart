@@ -6,11 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:apk_sideload/install_apk.dart';
 
-/// Auto-update service.
-/// On each app launch (Android only), checks GitHub Releases for a newer APK.
-/// If found, downloads it and triggers the system installer (user taps "Install" once).
 class UpdateService {
-  // TODO: Replace with your actual GitHub repo
   static const _repo = 'AbdulMannan19/ISD-TV-Display-System';
   static const _apiUrl = 'https://api.github.com/repos/$_repo/releases/latest';
   static const _prefKey = 'last_installed_release';
@@ -43,7 +39,6 @@ class UpdateService {
         return;
       }
 
-      // Find APK asset in the release
       final assets = release['assets'] as List;
       final apkAsset = assets.cast<Map<String, dynamic>>().firstWhere(
         (a) => (a['name'] as String).endsWith('.apk'),
@@ -51,14 +46,13 @@ class UpdateService {
       );
 
       if (apkAsset.isEmpty) {
-        debugPrint('[Update] No APK found in release');
+        debugPrint('[Update] No APK in release');
         return;
       }
 
       final downloadUrl = apkAsset['browser_download_url'] as String;
       debugPrint('[Update] Downloading: $downloadUrl');
 
-      // Download APK to temp directory
       final apkResponse = await http.get(Uri.parse(downloadUrl))
           .timeout(const Duration(minutes: 5));
 
@@ -69,14 +63,10 @@ class UpdateService {
 
       final dir = await getTemporaryDirectory();
       final apkPath = '${dir.path}/display_update.apk';
-      final apkFile = File(apkPath);
-      await apkFile.writeAsBytes(apkResponse.bodyBytes);
-      debugPrint('[Update] Downloaded ${apkResponse.bodyBytes.length} bytes to $apkPath');
+      await File(apkPath).writeAsBytes(apkResponse.bodyBytes);
+      debugPrint('[Update] Downloaded ${apkResponse.bodyBytes.length} bytes');
 
-      // Save the tag so we don't re-download after install
       await prefs.setString(_prefKey, tagName);
-
-      // Trigger system installer — user sees "Install?" prompt on TV
       await InstallApk().installApk(apkPath);
       debugPrint('[Update] Install triggered for $tagName');
     } catch (e) {

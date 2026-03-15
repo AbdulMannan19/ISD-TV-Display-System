@@ -37,12 +37,14 @@ class PrayerTimesService {
 
       final maghribIqamah = _addMinutes(maghribAdhan, 10);
 
-      // Fetch iqamah times from DB
+      // Fetch iqamah + jummah times from DB
       final iqamahTimes = await _fetchIqamahFromDb();
       final fajrIqamah = iqamahTimes['fajr'] ?? _addMinutes(fajrAdhan, 25);
       final dhuhrIqamah = iqamahTimes['zuhr'] ?? _addMinutes(dhuhrAdhan, 19);
       final asrIqamah = iqamahTimes['asr'] ?? _addMinutes(asrAdhan, 19);
       final ishaIqamah = iqamahTimes['isha'] ?? _addMinutes(ishaAdhan, 28);
+      final jummah1 = iqamahTimes['jummah1'] ?? '1:45 PM';
+      final jummah2 = iqamahTimes['jummah2'] ?? '1:45 PM';
 
       // Push adhan times + maghrib iqamah to DB
       await _updateDbTimes(
@@ -61,8 +63,8 @@ class PrayerTimesService {
         ],
         'sunrise': _to12(sunrise),
         'sunset': _to12(maghribAdhan),
-        'jummah1': '1:45 PM',
-        'jummah2': '1:45 PM',
+        'jummah1': jummah1,
+        'jummah2': jummah2,
       };
     } catch (e) {
       print('Error fetching prayer times: $e');

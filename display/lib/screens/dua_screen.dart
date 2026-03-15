@@ -104,7 +104,7 @@ class _DuaScreenState extends State<DuaScreen> {
             child: SingleChildScrollView(
               child: Text(todaysDua!['text']!,
                 style: const TextStyle(color: Color(0xFF1a1a2e),
-                  fontSize: 32, fontWeight: FontWeight.w400, height: 1.6, letterSpacing: 0.3)),
+                  fontSize: 20, fontWeight: FontWeight.w400, height: 1.6, letterSpacing: 0.3)),
             ),
           ),
           const SizedBox(height: 32),

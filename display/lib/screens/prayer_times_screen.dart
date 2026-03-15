@@ -59,6 +59,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           'iqamah': newIqamah ?? p['iqamah']!,
         };
       }).toList();
+      if (iqamah.containsKey('jummah1')) jummah1 = iqamah['jummah1']!;
+      if (iqamah.containsKey('jummah2')) jummah2 = iqamah['jummah2']!;
     });
   }
 
