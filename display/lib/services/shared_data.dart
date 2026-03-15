@@ -7,6 +7,9 @@ class SharedData {
 
   String sunrise = '';
   String sunset = '';
+  String jummah1 = '';
+  String jummah2 = '';
+  List<Map<String, String>> prayers = [];
   DateTime? _nextIqamahTarget;
   List<DateTime> _iqamahDateTimes = [];
 
@@ -16,12 +19,32 @@ class SharedData {
     if (data != null) {
       sunrise = data['sunrise'] as String;
       sunset = data['sunset'] as String;
+      jummah1 = data['jummah1'] as String;
+      jummah2 = data['jummah2'] as String;
+      prayers = (data['prayers'] as List).map((p) => {
+        'name': p['name'] as String,
+        'adhan': p['adhan'] as String,
+        'iqamah': p['iqamah'] as String,
+      }).toList();
     }
     await _loadIqamahTimes();
     _computeNextTarget();
   }
 
   Future<void> refreshIqamah() async {
+    final service = PrayerTimesService();
+    final data = await service.fetchPrayerTimes();
+    if (data != null) {
+      sunrise = data['sunrise'] as String;
+      sunset = data['sunset'] as String;
+      jummah1 = data['jummah1'] as String;
+      jummah2 = data['jummah2'] as String;
+      prayers = (data['prayers'] as List).map((p) => {
+        'name': p['name'] as String,
+        'adhan': p['adhan'] as String,
+        'iqamah': p['iqamah'] as String,
+      }).toList();
+    }
     await _loadIqamahTimes();
     _computeNextTarget();
   }

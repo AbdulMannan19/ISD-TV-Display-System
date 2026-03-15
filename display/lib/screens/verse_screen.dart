@@ -70,13 +70,21 @@ class _VerseScreenState extends State<VerseScreen> {
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(40.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
               children: [
-                Expanded(flex: 3, child: _buildContent()),
-                const SizedBox(width: 40),
-                Expanded(flex: 2, child: _buildInfoPanel()),
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(flex: 7, child: _buildContent()),
+                      const SizedBox(width: 20),
+                      Expanded(flex: 3, child: _buildInfoPanel()),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildPrayerBar(),
               ],
             ),
           ),
@@ -91,15 +99,15 @@ class _VerseScreenState extends State<VerseScreen> {
         color: Colors.white.withOpacity(0.95),
         borderRadius: BorderRadius.circular(20),
       ),
-      padding: const EdgeInsets.all(48),
+      padding: const EdgeInsets.all(36),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('VERSE OF THE DAY',
             style: TextStyle(color: const Color(0xFF0A2A5E).withOpacity(0.6),
-              fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 3)),
-          const SizedBox(height: 40),
+              fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 3)),
+          const SizedBox(height: 24),
           Expanded(
             child: SingleChildScrollView(
               child: Text(todaysVerse!['text']!,
@@ -107,15 +115,15 @@ class _VerseScreenState extends State<VerseScreen> {
                   fontSize: 20, fontWeight: FontWeight.w400, height: 1.6, letterSpacing: 0.3)),
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
               color: const Color(0xFF0A2A5E).withOpacity(0.08),
               borderRadius: BorderRadius.circular(8)),
             child: Text(todaysVerse!['source']!,
               style: TextStyle(color: const Color(0xFF0A2A5E).withOpacity(0.7),
-                fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+                fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
           ),
         ],
       ),
@@ -124,50 +132,126 @@ class _VerseScreenState extends State<VerseScreen> {
 
   Widget _buildInfoPanel() {
     final shared = SharedData.instance;
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(children: [
-          Container(
-            width: 160, height: 160,
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.asset('assets/images/qr_code.jpeg', fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.qr_code_2, size: 120, color: Colors.black54))),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.12)),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(children: [
+            Container(
+              width: 120, height: 120,
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset('assets/images/qr_code.jpeg', fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.qr_code_2, size: 80, color: Colors.black54))),
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: BoxDecoration(border: Border.all(color: Colors.white38), borderRadius: BorderRadius.circular(10)),
-            child: const Text('Islamic Society of Denton', textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
-          ),
-          const SizedBox(height: 12),
-          Text(_formatDate(_now), textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13, letterSpacing: 0.5)),
-        ]),
-        Column(children: [
-          Text(_formatTime(_now),
-            style: const TextStyle(color: Colors.white, fontSize: 56, fontWeight: FontWeight.w200, letterSpacing: -1)),
-          const SizedBox(height: 32),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.12), borderRadius: BorderRadius.circular(12)),
-            child: Column(children: [
-              Text('NEXT IQAMAH IN',
-                style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 2)),
-              const SizedBox(height: 8),
-              Text(shared.getCountdown(),
-                style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 1)),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(border: Border.all(color: Colors.white38), borderRadius: BorderRadius.circular(8)),
+              child: const Text('Islamic Society of Denton', textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+            ),
+            const SizedBox(height: 6),
+            Text(_formatDate(_now), textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 11, letterSpacing: 0.5)),
+          ]),
+          Column(children: [
+            Text(_formatTime(_now),
+              style: const TextStyle(color: Colors.white, fontSize: 42, fontWeight: FontWeight.w200, letterSpacing: -1)),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(color: Colors.white.withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
+              child: Column(children: [
+                Text('NEXT IQAMAH IN',
+                  style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 2)),
+                const SizedBox(height: 4),
+                Text(shared.getCountdown(),
+                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1)),
+              ]),
+            ),
+            const SizedBox(height: 12),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+              _sunInfo('☀️', 'SUNRISE', shared.sunrise),
+              _sunInfo('🌅', 'SUNSET', shared.sunset),
             ]),
-          ),
-          const SizedBox(height: 20),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            _sunInfo('☀️', 'SUNRISE', shared.sunrise),
-            _sunInfo('🌅', 'SUNSET', shared.sunset),
+          ]),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrayerBar() {
+    final shared = SharedData.instance;
+    if (shared.prayers.isEmpty) return const SizedBox();
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.15)),
+      ),
+      child: Row(
+        children: [
+          _prayerBarHeader(),
+          const SizedBox(width: 16),
+          ...shared.prayers.map((p) => Expanded(child: _prayerBarItem(p))),
+          if (shared.jummah1.isNotEmpty) ...[
+            Container(width: 1, height: 44, color: Colors.white24, margin: const EdgeInsets.symmetric(horizontal: 10)),
+            _jumuahBarItem(shared.jummah1, shared.jummah2),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _prayerBarHeader() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        const SizedBox(height: 16),
+        Text('STARTS', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
+        const SizedBox(height: 4),
+        Text('IQAMAH', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
+      ],
+    );
+  }
+
+  Widget _prayerBarItem(Map<String, String> p) {
+    return Column(
+      children: [
+        Text(p['name']!, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1)),
+        const SizedBox(height: 4),
+        Text(p['adhan']!, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 2),
+        Text(p['iqamah']!, style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 15, fontWeight: FontWeight.w700)),
+      ],
+    );
+  }
+
+  Widget _jumuahBarItem(String j1, String j2) {
+    return Column(
+      children: [
+        const Text("JUMU'AH", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1)),
+        const SizedBox(height: 4),
+        Row(children: [
+          Column(children: [
+            Text('1st', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 9)),
+            Text(j1, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+          ]),
+          const SizedBox(width: 14),
+          Column(children: [
+            Text('2nd', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 9)),
+            Text(j2, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
           ]),
         ]),
       ],
@@ -176,11 +260,11 @@ class _VerseScreenState extends State<VerseScreen> {
 
   Widget _sunInfo(String icon, String label, String time) {
     return Column(children: [
-      Text(icon, style: const TextStyle(fontSize: 24)),
-      const SizedBox(height: 6),
-      Text(label, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.w600)),
+      Text(icon, style: const TextStyle(fontSize: 18)),
       const SizedBox(height: 4),
-      Text(time, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w500)),
+      Text(label, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 9, letterSpacing: 1.5, fontWeight: FontWeight.w600)),
+      const SizedBox(height: 2),
+      Text(time, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500)),
     ]);
   }
 }

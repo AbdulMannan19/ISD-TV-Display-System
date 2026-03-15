@@ -92,9 +92,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   String _formatTime(DateTime dt) {
     final hour = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
     final minute = dt.minute.toString().padLeft(2, '0');
-    final second = dt.second.toString().padLeft(2, '0');
     final period = dt.hour >= 12 ? 'PM' : 'AM';
-    return '$hour:$minute:$second $period';
+    return '$hour:$minute $period';
   }
 
   String _formatDate(DateTime dt) {
@@ -280,7 +279,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           style: const TextStyle(
             color: Colors.white,
             fontSize: 28,
-            fontWeight: FontWeight.w300,
+            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(width: 2),
