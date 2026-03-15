@@ -107,7 +107,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   Widget build(BuildContext context) {
     if (isLoading) {
       return const Scaffold(
-        backgroundColor: Color(0xFF1A3A6B),
+        backgroundColor: Color(0xFF288A8A),
         body: Center(
           child: CircularProgressIndicator(color: Colors.white),
         ),
@@ -115,13 +115,13 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1A3A6B),
+      backgroundColor: const Color(0xFF288A8A),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF1E4D8C), Color(0xFF0F2D5E), Color(0xFF1A3A6B)],
+            colors: [Color(0xFF2A9E9E), Color(0xFF1A6B6B), Color(0xFF288A8A)],
           ),
         ),
         child: SafeArea(
