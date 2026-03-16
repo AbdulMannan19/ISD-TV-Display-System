@@ -35,23 +35,10 @@ class DuaService {
   }
 
   Future<Map<String, String>> _fetchDuaFromSupabase() async {
-    final countResponse = await _supabase
-        .from('duas')
-        .select('id')
-        .count(CountOption.exact);
-    
-    final totalCount = countResponse.count ?? 0;
-    
-    if (totalCount == 0) {
-      return _getFallbackDua();
-    }
-    
     final now = DateTime.now();
-    final seed = now.year * 10000 + now.month * 100 + now.day + 1;
-    final random = Random(seed);
-    
-    final id = random.nextInt(totalCount) + 1;
-    
+    final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays + 1;
+    final id = ((dayOfYear - 1) % 366) + 1;
+
     final response = await _supabase
         .from('duas')
         .select('text, source')

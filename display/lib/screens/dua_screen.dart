@@ -102,17 +102,21 @@ class _DuaScreenState extends State<DuaScreen> {
       padding: const EdgeInsets.all(36),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text('DUA OF THE DAY',
+            textAlign: TextAlign.center,
             style: TextStyle(color: const Color(0xFF0A2A5E).withOpacity(0.6),
               fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 3)),
           const SizedBox(height: 24),
           Expanded(
-            child: SingleChildScrollView(
-              child: Text(todaysDua!['text']!,
-                style: const TextStyle(color: Color(0xFF1a1a2e),
-                  fontSize: 20, fontWeight: FontWeight.w400, height: 1.6, letterSpacing: 0.3)),
+            child: Center(
+              child: SingleChildScrollView(
+                child: Text(todaysDua!['text']!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: const Color(0xFF1a1a2e),
+                    fontSize: _dynamicFontSize(todaysDua!['text']!.length), fontWeight: FontWeight.w400, height: 1.6, letterSpacing: 0.3)),
+              ),
             ),
           ),
           const SizedBox(height: 20),
@@ -122,6 +126,7 @@ class _DuaScreenState extends State<DuaScreen> {
               color: const Color(0xFF0A2A5E).withOpacity(0.08),
               borderRadius: BorderRadius.circular(8)),
             child: Text(todaysDua!['source']!,
+              textAlign: TextAlign.center,
               style: TextStyle(color: const Color(0xFF0A2A5E).withOpacity(0.7),
                 fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
           ),
@@ -208,6 +213,8 @@ class _DuaScreenState extends State<DuaScreen> {
             Container(width: 1, height: 44, color: Colors.white24, margin: const EdgeInsets.symmetric(horizontal: 10)),
             _jumuahBarItem(shared.jummah),
           ],
+          const SizedBox(width: 12),
+          Icon(Icons.mosque, size: 24, color: Colors.white.withOpacity(0.3)),
         ],
       ),
     );
@@ -245,6 +252,13 @@ class _DuaScreenState extends State<DuaScreen> {
         _subscriptTime(time, 15, FontWeight.w700),
       ],
     );
+  }
+
+  double _dynamicFontSize(int length) {
+    if (length < 100) return 32;
+    if (length < 200) return 26;
+    if (length < 400) return 22;
+    return 18;
   }
 
   Widget _buildClock() {

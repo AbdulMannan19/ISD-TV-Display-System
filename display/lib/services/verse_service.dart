@@ -35,23 +35,10 @@ class VerseService {
   }
 
   Future<Map<String, String>> _fetchVerseFromSupabase() async {
-    final countResponse = await _supabase
-        .from('verses')
-        .select('id')
-        .count(CountOption.exact);
-    
-    final totalCount = countResponse.count ?? 0;
-    
-    if (totalCount == 0) {
-      return _getFallbackVerse();
-    }
-    
     final now = DateTime.now();
-    final seed = now.year * 10000 + now.month * 100 + now.day + 2;
-    final random = Random(seed);
-    
-    final id = random.nextInt(totalCount) + 1;
-    
+    final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays + 1;
+    final id = ((dayOfYear - 1) % 366) + 1;
+
     final response = await _supabase
         .from('verses')
         .select('text, source')

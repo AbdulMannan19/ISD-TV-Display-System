@@ -381,6 +381,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               _sunInfo('🌅', 'SUNSET', sunset),
             ],
           ),
+          const SizedBox(height: 12),
+          Icon(Icons.mosque, size: 28, color: Colors.white.withOpacity(0.3)),
         ],
       ),
     );
