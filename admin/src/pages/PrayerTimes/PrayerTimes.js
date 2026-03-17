@@ -127,29 +127,6 @@ export default function PrayerTimes() {
         </table>
       </div>
 
-      <div className="pt-table-wrap" style={{ marginTop: '20px' }}>
-        <table className="pt-table">
-          <thead>
-            <tr>
-              <th>Jumu'ah</th>
-              <th>Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="pt-prayer-name">Jumu'ah</td>
-              <td className="pt-time">
-                <input
-                  type="time"
-                  value={editing['jummah'] || ''}
-                  onChange={e => setEditing({ ...editing, jummah: e.target.value })}
-                  className="pt-input"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }
