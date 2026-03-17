@@ -72,8 +72,6 @@ class _ScreenRotatorState extends State<ScreenRotator> {
   final _displayMode = DisplayModeService();
 
   Timer? _rotationTimer;
-  Timer? _silenceCheckTimer;
-  Timer? _prohibitedCheckTimer;
   Timer? _midnightTimer;
   Timer? _prayerRefreshTimer;
   StreamSubscription? _slidesSubscription;
@@ -83,21 +81,23 @@ class _ScreenRotatorState extends State<ScreenRotator> {
     super.initState();
     _buildScreens();
     _listenToSlideChanges();
-    _displayMode.fetchPrayerData();
-    _displayMode.fetchIqamahTimes();
+
+    _displayMode.setOnModeChanged(() {
+      if (mounted) setState(() {});
+    });
+
+    // Fetch data then schedule smart timers
+    _displayMode.fetchPrayerData().then((_) {
+      _displayMode.fetchIqamahTimes().then((_) {
+        _displayMode.scheduleSilence();
+        _displayMode.scheduleProhibited();
+      });
+    });
 
     _rotationTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (mounted && _screensBuilt && _displayMode.mode == DisplayMode.normal) {
         setState(() => _currentIndex = (_currentIndex + 1) % _screens.length);
       }
-    });
-
-    _silenceCheckTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      if (_displayMode.checkSilence()) setState(() {});
-    });
-
-    _prohibitedCheckTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      if (_displayMode.checkProhibited()) setState(() {});
     });
 
     _scheduleMidnightRefresh();
@@ -127,11 +127,19 @@ class _ScreenRotatorState extends State<ScreenRotator> {
     final nextMidnight = DateTime(now.year, now.month, now.day).add(const Duration(days: 1));
     final next = now.isBefore(nextNoon) ? nextNoon : nextMidnight;
     _prayerRefreshTimer = Timer(next.difference(now), () {
-      _displayMode.fetchPrayerData();
-      _displayMode.fetchIqamahTimes();
+      _displayMode.fetchPrayerData().then((_) {
+        _displayMode.fetchIqamahTimes().then((_) {
+          _displayMode.scheduleSilence();
+          _displayMode.scheduleProhibited();
+        });
+      });
       _prayerRefreshTimer = Timer.periodic(const Duration(hours: 12), (_) {
-        _displayMode.fetchPrayerData();
-        _displayMode.fetchIqamahTimes();
+        _displayMode.fetchPrayerData().then((_) {
+          _displayMode.fetchIqamahTimes().then((_) {
+            _displayMode.scheduleSilence();
+            _displayMode.scheduleProhibited();
+          });
+        });
       });
     });
   }
@@ -164,11 +172,10 @@ class _ScreenRotatorState extends State<ScreenRotator> {
   @override
   void dispose() {
     _rotationTimer?.cancel();
-    _silenceCheckTimer?.cancel();
-    _prohibitedCheckTimer?.cancel();
     _midnightTimer?.cancel();
     _prayerRefreshTimer?.cancel();
     _slidesSubscription?.cancel();
+    _displayMode.dispose();
     super.dispose();
   }
 

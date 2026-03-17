@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'shared_data.dart';
 import 'prayer_times_service.dart';
@@ -11,6 +11,10 @@ class DisplayModeService {
   DateTime? silenceEndTime;
   DateTime? prohibitedEndTime;
 
+  Timer? _silenceTimer;
+  Timer? _prohibitedTimer;
+  VoidCallback? _onModeChanged;
+
   List<String> _iqamahTimes = [];
   String _sunriseTime = '';
   String _sunsetTime = '';
@@ -19,6 +23,10 @@ class DisplayModeService {
   String get sunriseTime => _sunriseTime;
   String get sunsetTime => _sunsetTime;
   List<Map<String, String>> get prayersList => _prayersList;
+
+  void setOnModeChanged(VoidCallback callback) {
+    _onModeChanged = callback;
+  }
 
   Future<void> fetchPrayerData() async {
     try {
@@ -57,105 +65,162 @@ class DisplayModeService {
     }
   }
 
-  /// Returns true if mode changed.
-  bool checkSilence() {
-    if (mode == DisplayMode.silence) {
-      if (DateTime.now().isAfter(silenceEndTime!)) {
+  /// Schedule the next silence screen. Calculates exact time until next iqamah,
+  /// fires once, shows silence for 15 min (or 45 for jumu'ah), then reschedules.
+  void scheduleSilence() {
+    _silenceTimer?.cancel();
+    final now = DateTime.now();
+
+    // If currently in silence mode, schedule exit
+    if (mode == DisplayMode.silence && silenceEndTime != null) {
+      final remaining = silenceEndTime!.difference(now);
+      if (remaining.isNegative) {
         mode = DisplayMode.normal;
         silenceEndTime = null;
-        return true;
+        _onModeChanged?.call();
+        scheduleSilence();
+      } else {
+        _silenceTimer = Timer(remaining, () {
+          mode = DisplayMode.normal;
+          silenceEndTime = null;
+          _onModeChanged?.call();
+          scheduleSilence();
+        });
       }
-      return false;
+      return;
     }
 
-    final now = DateTime.now();
-    final currentTime = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    // Find next iqamah time
+    final upcoming = <DateTime>[];
 
     for (final iqamah in _iqamahTimes) {
-      if (iqamah == currentTime) {
-        mode = DisplayMode.silence;
-        silenceEndTime = now.add(const Duration(minutes: 15));
-        return true;
-      }
+      final dt = _parseTimeToday(iqamah);
+      if (dt != null && dt.isAfter(now)) upcoming.add(dt);
     }
 
-    // Friday Jumu'ah: 45 min silence
-    if (now.weekday == DateTime.friday && mode != DisplayMode.silence) {
+    // Friday jumu'ah
+    if (now.weekday == DateTime.friday) {
       final jummahTime = SharedData.instance.jummah;
       if (jummahTime.isNotEmpty) {
-        final jummahDt = _parseTimeToday(jummahTime);
-        if (jummahDt != null) {
-          final jummahEnd = jummahDt.add(const Duration(minutes: 45));
-          if (now.isAfter(jummahDt) && now.isBefore(jummahEnd)) {
-            mode = DisplayMode.silence;
-            silenceEndTime = jummahEnd;
-            return true;
-          }
-        }
+        final jDt = _parseTimeToday(jummahTime);
+        if (jDt != null && jDt.isAfter(now)) upcoming.add(jDt);
       }
     }
-    return false;
+
+    if (upcoming.isEmpty) return;
+    upcoming.sort();
+    final next = upcoming.first;
+    final delay = next.difference(now);
+
+    _silenceTimer = Timer(delay, () {
+      // Determine duration: 45 min for jumu'ah on Friday, 15 min otherwise
+      final isFridayJummah = now.weekday == DateTime.friday &&
+          SharedData.instance.jummah.isNotEmpty &&
+          _parseTimeToday(SharedData.instance.jummah) == next;
+      final duration = isFridayJummah ? 45 : 15;
+
+      mode = DisplayMode.silence;
+      silenceEndTime = DateTime.now().add(Duration(minutes: duration));
+      _onModeChanged?.call();
+      scheduleSilence(); // This will now schedule the exit
+    });
   }
 
-  /// Returns true if mode changed.
-  bool checkProhibited() {
-    if (mode == DisplayMode.prohibited) {
-      if (DateTime.now().isAfter(prohibitedEndTime!)) {
+  /// Schedule the next prohibited time screen. Calculates exact time until
+  /// next prohibited window, fires once, shows for duration, then reschedules.
+  void scheduleProhibited() {
+    _prohibitedTimer?.cancel();
+    final now = DateTime.now();
+
+    // If currently in prohibited mode, schedule exit
+    if (mode == DisplayMode.prohibited && prohibitedEndTime != null) {
+      final remaining = prohibitedEndTime!.difference(now);
+      if (remaining.isNegative) {
         mode = DisplayMode.normal;
         prohibitedEndTime = null;
-        return true;
+        _onModeChanged?.call();
+        scheduleProhibited();
+      } else {
+        _prohibitedTimer = Timer(remaining, () {
+          mode = DisplayMode.normal;
+          prohibitedEndTime = null;
+          _onModeChanged?.call();
+          scheduleProhibited();
+        });
       }
-      return false;
+      return;
     }
 
-    final now = DateTime.now();
+    // Build list of prohibited windows: (start, end)
+    final windows = <List<DateTime>>[];
     final sunriseDt = _parseTimeToday(_sunriseTime);
     final sunsetDt = _parseTimeToday(_sunsetTime);
-    if (sunriseDt == null || sunsetDt == null) return false;
 
-    // 15 min after sunrise
-    final sunriseEnd = sunriseDt.add(const Duration(minutes: 15));
-    if (now.isAfter(sunriseDt) && now.isBefore(sunriseEnd)) {
-      mode = DisplayMode.prohibited;
-      prohibitedEndTime = sunriseEnd;
-      return true;
+    if (sunriseDt != null) {
+      windows.add([sunriseDt, sunriseDt.add(const Duration(minutes: 15))]);
+    }
+    if (sunsetDt != null) {
+      windows.add([sunsetDt.subtract(const Duration(minutes: 15)), sunsetDt]);
     }
 
-    // 15 min before sunset
-    final sunsetStart = sunsetDt.subtract(const Duration(minutes: 15));
-    if (now.isAfter(sunsetStart) && now.isBefore(sunsetDt)) {
-      mode = DisplayMode.prohibited;
-      prohibitedEndTime = sunsetDt;
-      return true;
-    }
-
-    // 15 min before Dhuhr start (solar zenith)
     final dhuhrStart = _prayersList
         .where((p) => p['name'] == 'DHUHR')
         .map((p) => _parseTimeToday(p['start']!))
         .firstOrNull;
     if (dhuhrStart != null) {
-      final dhuhrProhibitedStart = dhuhrStart.subtract(const Duration(minutes: 15));
-      if (now.isAfter(dhuhrProhibitedStart) && now.isBefore(dhuhrStart)) {
+      windows.add([dhuhrStart.subtract(const Duration(minutes: 15)), dhuhrStart]);
+    }
+
+    // Check if we're currently inside a window
+    for (final w in windows) {
+      if (now.isAfter(w[0]) && now.isBefore(w[1])) {
         mode = DisplayMode.prohibited;
-        prohibitedEndTime = dhuhrStart;
-        return true;
+        prohibitedEndTime = w[1];
+        _onModeChanged?.call();
+        scheduleProhibited(); // Schedule exit
+        return;
       }
     }
-    return false;
+
+    // Find next upcoming window start
+    final futureStarts = windows.where((w) => w[0].isAfter(now)).toList();
+    if (futureStarts.isEmpty) return;
+    futureStarts.sort((a, b) => a[0].compareTo(b[0]));
+
+    final nextWindow = futureStarts.first;
+    final delay = nextWindow[0].difference(now);
+
+    _prohibitedTimer = Timer(delay, () {
+      mode = DisplayMode.prohibited;
+      prohibitedEndTime = nextWindow[1];
+      _onModeChanged?.call();
+      scheduleProhibited(); // Schedule exit
+    });
   }
 
   void setTestSilence() {
-    mode = mode == DisplayMode.silence ? DisplayMode.normal : DisplayMode.silence;
+    _silenceTimer?.cancel();
     if (mode == DisplayMode.silence) {
+      mode = DisplayMode.normal;
+      silenceEndTime = null;
+      scheduleSilence();
+    } else {
+      mode = DisplayMode.silence;
       silenceEndTime = DateTime.now().add(const Duration(hours: 1));
+      scheduleSilence();
     }
   }
 
   void setTestProhibited() {
-    mode = mode == DisplayMode.prohibited ? DisplayMode.normal : DisplayMode.prohibited;
+    _prohibitedTimer?.cancel();
     if (mode == DisplayMode.prohibited) {
+      mode = DisplayMode.normal;
+      prohibitedEndTime = null;
+      scheduleProhibited();
+    } else {
+      mode = DisplayMode.prohibited;
       prohibitedEndTime = DateTime.now().add(const Duration(minutes: 15));
+      scheduleProhibited();
     }
   }
 
@@ -163,6 +228,13 @@ class DisplayModeService {
     mode = DisplayMode.normal;
     silenceEndTime = null;
     prohibitedEndTime = null;
+    scheduleSilence();
+    scheduleProhibited();
+  }
+
+  void dispose() {
+    _silenceTimer?.cancel();
+    _prohibitedTimer?.cancel();
   }
 
   DateTime? _parseTimeToday(String time) {
