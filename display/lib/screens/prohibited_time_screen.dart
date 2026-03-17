@@ -58,7 +58,7 @@ class _ProhibitedTimeScreenState extends State<ProhibitedTimeScreen> {
             textAlign: TextAlign.center,
             style: TextStyle(color: accent.withOpacity(0.8),
               fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 3)),
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
           Expanded(
             child: Center(
               child: SingleChildScrollView(
@@ -81,15 +81,21 @@ class _ProhibitedTimeScreenState extends State<ProhibitedTimeScreen> {
                         style: TextStyle(color: const Color(0xFF1a1a2e).withOpacity(0.55),
                           fontSize: 15, fontStyle: FontStyle.italic, height: 1.6)),
                     ),
-                    const SizedBox(height: 8),
-                    Text('— Sahih Muslim, 831',
-                      style: TextStyle(color: accent.withOpacity(0.6),
-                        fontSize: 13, fontWeight: FontWeight.w600)),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 24, top: 4),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text('— Sahih Muslim, 831',
+                          style: TextStyle(color: accent.withOpacity(0.6),
+                            fontSize: 13, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
           ),
+          const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
