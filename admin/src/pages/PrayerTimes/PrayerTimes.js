@@ -45,6 +45,12 @@ export default function PrayerTimes() {
   const handleSave = async () => {
     setSaving(true);
     setStatus('');
+
+    // Detect which iqamah times changed
+    const changed = Object.entries(editing).filter(([prayer, iqamah]) =>
+      times[prayer] && times[prayer].iqamah !== iqamah
+    );
+
     const updates = Object.entries(editing).map(([prayer, iqamah]) =>
       supabase.from('prayer_times').update({ iqamah }).eq('prayer', prayer)
     );
@@ -53,6 +59,14 @@ export default function PrayerTimes() {
     if (err) {
       setStatus('Error saving: ' + err.error.message);
     } else {
+      // Auto-create alert if any times changed
+      if (changed.length > 0) {
+        const parts = changed.map(([prayer, iqamah]) =>
+          `${LABELS[prayer]}: ${to12(iqamah)}`
+        );
+        const alertText = `Iqamah time updated — ${parts.join(', ')}`;
+        await supabase.from('alerts').insert({ text: alertText });
+      }
       setStatus('Times updated');
       fetchTimes();
     }
