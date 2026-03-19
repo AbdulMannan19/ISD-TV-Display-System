@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/prayer_times_service.dart';
 import '../services/shared_data.dart';
+import 'settings_screen.dart';
 
 class PrayerTimesScreen extends StatefulWidget {
   const PrayerTimesScreen({super.key});
@@ -226,7 +227,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   ),
                 ),
                 const SizedBox(width: 20),
-                _subscriptTime(jummah, 22, FontWeight.w600),
+                _subscriptTime(jummah, 28, FontWeight.w600),
               ],
             ),
           ),
@@ -269,7 +270,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           sp[0],
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 32,
+            fontSize: 40,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -382,7 +383,10 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          Icon(Icons.mosque, size: 28, color: Colors.white.withOpacity(0.3)),
+          GestureDetector(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
+            child: Icon(Icons.mosque, size: 28, color: Colors.white.withOpacity(0.3)),
+          ),
         ],
       ),
     );
@@ -433,7 +437,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           ),
         ),
         const SizedBox(height: 2),
-        _subscriptTime(time, 16, FontWeight.w500),
+        _subscriptTime(time, 18, FontWeight.w500),
       ],
     );
   }

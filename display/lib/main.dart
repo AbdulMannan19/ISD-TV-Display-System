@@ -12,7 +12,6 @@ import 'screens/silence_screen.dart';
 import 'screens/prohibited_time_screen.dart';
 import 'services/daily_content_service.dart';
 import 'services/slides_service.dart';
-import 'services/update_service.dart';
 import 'services/shared_data.dart';
 import 'services/display_mode_service.dart';
 import 'services/alert_service.dart';
@@ -40,7 +39,6 @@ Future<void> main() async {
     DeviceOrientation.landscapeRight,
   ]);
 
-  UpdateService.checkForUpdate();
   await SharedData.instance.init();
   await IqamahScheduleService.applyScheduledChanges();
   runApp(const DisplayApp());

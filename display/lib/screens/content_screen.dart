@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../services/shared_data.dart';
+import 'settings_screen.dart';
 
 class ContentScreen extends StatefulWidget {
   final String title;
@@ -252,7 +253,10 @@ class _ContentScreenState extends State<ContentScreen> {
             _jumuahBarItem(shared.jummah),
           ],
           const SizedBox(width: 12),
-          Icon(Icons.mosque, size: 24, color: Colors.white.withOpacity(0.3)),
+          GestureDetector(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
+            child: Icon(Icons.mosque, size: 24, color: Colors.white.withOpacity(0.3)),
+          ),
         ],
       ),
     );
@@ -275,9 +279,9 @@ class _ContentScreenState extends State<ContentScreen> {
       children: [
         Text(p['name']!, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 1)),
         const SizedBox(height: 4),
-        _subscriptTime(p['adhan']!, 18, FontWeight.w700),
+        _subscriptTime(p['adhan']!, 22, FontWeight.w700),
         const SizedBox(height: 2),
-        _subscriptTime(p['iqamah']!, 18, FontWeight.w700, opacity: 0.7),
+        _subscriptTime(p['iqamah']!, 22, FontWeight.w700),
       ],
     );
   }
@@ -287,7 +291,7 @@ class _ContentScreenState extends State<ContentScreen> {
       children: [
         const Text("JUMU'AH", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 1)),
         const SizedBox(height: 4),
-        _subscriptTime(time, 18, FontWeight.w700),
+        _subscriptTime(time, 22, FontWeight.w700),
       ],
     );
   }
