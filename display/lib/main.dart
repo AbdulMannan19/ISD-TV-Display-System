@@ -16,6 +16,7 @@ import 'services/update_service.dart';
 import 'services/shared_data.dart';
 import 'services/display_mode_service.dart';
 import 'services/alert_service.dart';
+import 'services/iqamah_schedule_service.dart';
 import 'test/test_controls.dart';
 
 Future<void> main() async {
@@ -41,6 +42,7 @@ Future<void> main() async {
 
   UpdateService.checkForUpdate();
   await SharedData.instance.init();
+  await IqamahScheduleService.applyScheduledChanges();
   runApp(const DisplayApp());
 }
 
@@ -78,12 +80,14 @@ class _ScreenRotatorState extends State<ScreenRotator> {
   Timer? _midnightTimer;
   Timer? _prayerRefreshTimer;
   StreamSubscription? _slidesSubscription;
+  StreamSubscription? _prayerTimesSubscription;
 
   @override
   void initState() {
     super.initState();
     _buildScreens();
     _listenToSlideChanges();
+    _listenToPrayerTimesChanges();
 
     // Init alerts
     AlertService.instance.init();
@@ -125,6 +129,7 @@ class _ScreenRotatorState extends State<ScreenRotator> {
   }
 
   Future<void> _refreshDailyContent() async {
+    await IqamahScheduleService.applyScheduledChanges();
     await Future.wait([
       DailyContentService(tableName: 'hadiths', fallback: {'text': '', 'source': ''}).getTodaysContent(),
       DailyContentService(tableName: 'duas', fallback: {'text': '', 'source': ''}).getTodaysContent(),
@@ -162,6 +167,27 @@ class _ScreenRotatorState extends State<ScreenRotator> {
         .listen((_) { if (mounted) _buildScreens(); });
   }
 
+  Timer? _prayerTimesDebounce;
+
+  void _listenToPrayerTimesChanges() {
+    _prayerTimesSubscription = Supabase.instance.client
+        .from('prayer_times')
+        .stream(primaryKey: ['id'])
+        .listen((_) {
+      if (!mounted) return;
+      // Debounce: multiple rows update in quick succession
+      _prayerTimesDebounce?.cancel();
+      _prayerTimesDebounce = Timer(const Duration(seconds: 2), () {
+        if (!mounted) return;
+        // Only refresh iqamah data from Supabase — no need to hit Aladhan API
+        _displayMode.fetchIqamahTimes().then((_) {
+          _displayMode.scheduleIqamahLock();
+          if (mounted) setState(() {});
+        });
+      });
+    });
+  }
+
   Future<void> _buildScreens() async {
     final slides = await SlidesService().getActiveSlides();
     final screens = <Widget>[
@@ -186,6 +212,8 @@ class _ScreenRotatorState extends State<ScreenRotator> {
     _midnightTimer?.cancel();
     _prayerRefreshTimer?.cancel();
     _slidesSubscription?.cancel();
+    _prayerTimesSubscription?.cancel();
+    _prayerTimesDebounce?.cancel();
     _alertSubscription?.cancel();
     AlertService.instance.dispose();
     _displayMode.dispose();
@@ -277,7 +305,7 @@ class _AlertMarqueeState extends State<_AlertMarquee>
       _childWidth = renderBox.size.width;
     }
     final totalDistance = _screenWidth + _childWidth;
-    final durationMs = (totalDistance / 100 * 1000).toInt();
+    final durationMs = (totalDistance / 50 * 1000).toInt();
     _controller.duration = Duration(milliseconds: durationMs);
     _controller.repeat();
   }

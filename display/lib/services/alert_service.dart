@@ -11,37 +11,31 @@ class AlertService {
   List<String> get currentAlerts => _currentAlerts;
 
   StreamSubscription? _subscription;
-  Timer? _cleanupTimer;
+  Timer? _refreshTimer;
 
   void init() {
-    // Initial fetch
     _fetchAlerts();
 
-    // Listen to realtime changes on alerts table
     _subscription = Supabase.instance.client
         .from('alerts')
         .stream(primaryKey: ['id'])
         .listen((_) => _fetchAlerts());
 
-    // Periodic cleanup check every hour (for 24h expiry)
-    _cleanupTimer = Timer.periodic(const Duration(hours: 1), (_) => _fetchAlerts());
+    // Re-check every 15 min for alerts entering/leaving their window
+    _refreshTimer = Timer.periodic(const Duration(minutes: 15), (_) => _fetchAlerts());
   }
 
   Future<void> _fetchAlerts() async {
     try {
+      final now = DateTime.now().toUtc().toIso8601String();
       final response = await Supabase.instance.client
           .from('alerts')
-          .select('text, created_at')
+          .select('text')
+          .lte('start_time', now)
+          .gt('end_time', now)
           .order('created_at', ascending: false);
 
-      final now = DateTime.now();
-      final active = <String>[];
-      for (final row in response as List) {
-        final createdAt = DateTime.parse(row['created_at'] as String);
-        if (now.difference(createdAt).inHours < 24) {
-          active.add(row['text'] as String);
-        }
-      }
+      final active = (response as List).map((r) => r['text'] as String).toList();
       _currentAlerts = active;
       _controller.add(active);
     } catch (e) {
@@ -51,7 +45,7 @@ class AlertService {
 
   void dispose() {
     _subscription?.cancel();
-    _cleanupTimer?.cancel();
+    _refreshTimer?.cancel();
     _controller.close();
   }
 }

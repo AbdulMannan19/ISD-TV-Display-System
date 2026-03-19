@@ -99,3 +99,102 @@
   color: #1e40af;
   font-weight: 600;
 }
+
+/* Validation */
+.pt-row-error td { background: #fef2f2; }
+.pt-input-error { border-color: #ef4444 !important; }
+.pt-input-error:focus { box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important; }
+.pt-error-msg {
+  font-size: 0.75rem;
+  color: #dc2626;
+  margin-top: 4px;
+}
+
+/* Schedule section */
+.pt-schedule-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.pt-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.pt-section-sub {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.pt-schedule-form {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 16px;
+}
+
+.pt-select {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: var(--bg);
+  color: var(--text-primary);
+}
+.pt-select:focus {
+  outline: none;
+  border-color: var(--green);
+}
+
+.pt-schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pt-schedule-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.pt-schedule-prayer {
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 80px;
+}
+
+.pt-schedule-time {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.pt-schedule-date {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  flex: 1;
+}
+
+.pt-schedule-delete {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.pt-schedule-delete:hover { background: #b91c1c; }

@@ -262,10 +262,10 @@ class _ContentScreenState extends State<ContentScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        const SizedBox(height: 16),
-        Text('STARTS', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
+        const SizedBox(height: 20),
+        Text('STARTS', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 1)),
         const SizedBox(height: 4),
-        Text('IQAMAH', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
+        Text('IQAMAH', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 1)),
       ],
     );
   }
@@ -273,11 +273,11 @@ class _ContentScreenState extends State<ContentScreen> {
   Widget _prayerBarItem(Map<String, String> p) {
     return Column(
       children: [
-        Text(p['name']!, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1)),
+        Text(p['name']!, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 1)),
         const SizedBox(height: 4),
-        _subscriptTime(p['adhan']!, 15, FontWeight.w700),
+        _subscriptTime(p['adhan']!, 18, FontWeight.w700),
         const SizedBox(height: 2),
-        _subscriptTime(p['iqamah']!, 15, FontWeight.w700, opacity: 0.7),
+        _subscriptTime(p['iqamah']!, 18, FontWeight.w700, opacity: 0.7),
       ],
     );
   }
@@ -285,9 +285,9 @@ class _ContentScreenState extends State<ContentScreen> {
   Widget _jumuahBarItem(String time) {
     return Column(
       children: [
-        const Text("JUMU'AH", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1)),
+        const Text("JUMU'AH", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 1)),
         const SizedBox(height: 4),
-        _subscriptTime(time, 15, FontWeight.w700),
+        _subscriptTime(time, 18, FontWeight.w700),
       ],
     );
   }
@@ -298,7 +298,7 @@ class _ContentScreenState extends State<ContentScreen> {
       const SizedBox(height: 4),
       Text(label, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 9, letterSpacing: 1.5, fontWeight: FontWeight.w600)),
       const SizedBox(height: 2),
-      _subscriptTime(time, 13, FontWeight.w500),
+      _subscriptTime(time, 15, FontWeight.w500),
     ]);
   }
 

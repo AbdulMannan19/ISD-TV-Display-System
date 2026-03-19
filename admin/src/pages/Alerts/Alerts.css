@@ -1,11 +1,20 @@
-.alerts-form {
-  display: flex;
+.alerts-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
   gap: 12px;
   margin-bottom: 24px;
 }
 
+.alerts-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
 .alerts-input {
-  flex: 1;
   padding: 10px 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -14,6 +23,18 @@
   transition: border-color 0.15s;
 }
 .alerts-input:focus {
+  outline: none;
+  border-color: var(--green);
+}
+
+.alerts-input-sm {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-family: inherit;
+}
+.alerts-input-sm:focus {
   outline: none;
   border-color: var(--green);
 }
@@ -44,25 +65,69 @@
   padding: 16px 20px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
   transition: all 0.2s;
 }
-.alert-card:hover {
-  border-color: var(--green-border);
+.alert-card:hover { border-color: var(--green-border); }
+
+.alert-active { border-left: 3px solid var(--green); }
+.alert-scheduled { border-left: 3px solid #f59e0b; }
+.alert-expired { border-left: 3px solid var(--border); opacity: 0.6; }
+
+.alert-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .alert-text {
   font-size: 0.95rem;
   color: var(--text);
-  flex: 1;
 }
 
 .alert-meta {
   font-size: 0.75rem;
   color: var(--text-muted);
-  margin-left: 16px;
+}
+
+.alert-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.alert-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   white-space: nowrap;
 }
+.alert-badge-active { background: var(--green-bg); color: var(--green); }
+.alert-badge-scheduled { background: #fef3c7; color: #92400e; }
+.alert-badge-expired { background: #f3f4f6; color: #6b7280; }
+
+.alert-action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--green-bg);
+  color: var(--green);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.alert-action-btn:hover { background: var(--green-border); }
 
 .alert-delete {
   width: 32px;
@@ -75,17 +140,19 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  margin-left: 12px;
   transition: background 0.15s;
   flex-shrink: 0;
 }
-.alert-delete:hover {
-  background: #b91c1c;
-}
+.alert-delete:hover { background: #b91c1c; }
 
 .alerts-empty {
   text-align: center;
   padding: 40px;
   color: var(--text-muted);
   font-size: 0.9rem;
+}
+
+.btn-sm {
+  padding: 4px 12px;
+  font-size: 0.8rem;
 }

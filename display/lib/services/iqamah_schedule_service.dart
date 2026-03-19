@@ -1,0 +1,65 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class IqamahScheduleService {
+  static final _supabase = Supabase.instance.client;
+
+  static const _labels = {
+    'fajr': 'Fajr',
+    'zuhr': 'Dhuhr',
+    'asr': 'Asr',
+    'maghrib': 'Maghrib',
+    'isha': 'Isha',
+  };
+
+  /// Check for scheduled iqamah changes effective today or earlier,
+  /// apply them to prayer_times, create alerts, and delete consumed rows.
+  static Future<void> applyScheduledChanges() async {
+    try {
+      final today = DateTime.now();
+      final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+
+      final response = await _supabase
+          .from('iqamah_schedule')
+          .select('*')
+          .lte('effective_date', todayStr);
+
+      final rows = response as List;
+      if (rows.isEmpty) return;
+
+      // Group changes for the alert message
+      final changes = <String>[];
+
+      for (final row in rows) {
+        final prayer = row['prayer'] as String;
+        final iqamah = row['iqamah'] as String;
+        final id = row['id'];
+
+        // Apply: update prayer_times
+        await _supabase
+            .from('prayer_times')
+            .update({'iqamah': iqamah})
+            .eq('prayer', prayer);
+
+        changes.add('${_labels[prayer] ?? prayer}: $iqamah');
+
+        // Delete consumed row
+        await _supabase.from('iqamah_schedule').delete().eq('id', id);
+      }
+
+      // Auto-create alert for applied changes
+      if (changes.isNotEmpty) {
+        final alertText = 'Iqamah time updated — ${changes.join(', ')}';
+        final now = DateTime.now().toUtc();
+        await _supabase.from('alerts').insert({
+          'text': alertText,
+          'start_time': now.toIso8601String(),
+          'end_time': now.add(const Duration(hours: 24)).toIso8601String(),
+        });
+      }
+
+      print('Applied ${rows.length} scheduled iqamah changes');
+    } catch (e) {
+      print('Error applying scheduled changes: $e');
+    }
+  }
+}

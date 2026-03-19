@@ -226,7 +226,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   ),
                 ),
                 const SizedBox(width: 20),
-                _subscriptTime(jummah, 18, FontWeight.w600),
+                _subscriptTime(jummah, 22, FontWeight.w600),
               ],
             ),
           ),
@@ -269,7 +269,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           sp[0],
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 28,
+            fontSize: 32,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -433,7 +433,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           ),
         ),
         const SizedBox(height: 2),
-        _subscriptTime(time, 14, FontWeight.w500),
+        _subscriptTime(time, 16, FontWeight.w500),
       ],
     );
   }
