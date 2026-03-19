@@ -9,6 +9,9 @@ import Slides from './pages/Slides/Slides';
 import PrayerTimes from './pages/PrayerTimes/PrayerTimes';
 import Profile from './pages/Profile/Profile';
 import Alerts from './pages/Alerts/Alerts';
+import Hadiths from './pages/Content/Hadiths';
+import Duas from './pages/Content/Duas';
+import Verses from './pages/Content/Verses';
 import './App.css';
 
 function AppContent() {
@@ -56,6 +59,9 @@ function AppContent() {
           <Route path="/slides" element={<Slides />} />
           <Route path="/prayer-times" element={<PrayerTimes />} />
           <Route path="/alerts" element={<Alerts />} />
+          <Route path="/hadiths" element={<Hadiths />} />
+          <Route path="/duas" element={<Duas />} />
+          <Route path="/verses" element={<Verses />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<Navigate to="/prayer-times" />} />
         </Routes>

@@ -70,3 +70,33 @@
   border-radius: var(--radius-sm); padding: 10px 14px;
   font-size: 0.8rem; color: var(--green); margin-bottom: 16px;
 }
+
+.slide-footer {
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+}
+
+.slide-duration {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  cursor: default;
+}
+
+.slide-duration-input {
+  width: 50px;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  text-align: center;
+}
+.slide-duration-input:focus {
+  outline: none;
+  border-color: var(--green);
+}

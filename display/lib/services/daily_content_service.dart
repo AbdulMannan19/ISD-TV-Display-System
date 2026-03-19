@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'shared_data.dart';
 
 class DailyContentService {
   final String tableName;
@@ -39,9 +40,11 @@ class DailyContentService {
   }
 
   Future<Map<String, String>> _fetchFromSupabase() async {
-    final now = DateTime.now();
-    final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays + 1;
-    final id = ((dayOfYear - 1) % 366) + 1;
+    // Use hijri month & day directly: id = (month - 1) * 30 + day
+    // 360 rows total (12 months × 30 days), covers every possible hijri date
+    final hijriMonth = SharedData.instance.hijriMonth;
+    final hijriDay = SharedData.instance.hijriDay;
+    final id = (hijriMonth - 1) * 30 + hijriDay;
 
     final response = await Supabase.instance.client
         .from(tableName)

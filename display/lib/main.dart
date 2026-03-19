@@ -27,6 +27,10 @@ Future<void> main() async {
   );
 
   // Pre-fetch daily content
+  // Init SharedData first (fetches hijri date from API)
+  await SharedData.instance.init();
+
+  // Pre-fetch daily content (uses hijri day-of-year)
   await Future.wait([
     DailyContentService(tableName: 'hadiths', fallback: {'text': '', 'source': ''}).getTodaysContent(),
     DailyContentService(tableName: 'duas', fallback: {'text': '', 'source': ''}).getTodaysContent(),
@@ -39,7 +43,6 @@ Future<void> main() async {
     DeviceOrientation.landscapeRight,
   ]);
 
-  await SharedData.instance.init();
   await IqamahScheduleService.applyScheduledChanges();
   runApp(const DisplayApp());
 }
@@ -68,6 +71,7 @@ class ScreenRotator extends StatefulWidget {
 class _ScreenRotatorState extends State<ScreenRotator> {
   int _currentIndex = 0;
   List<Widget> _screens = [];
+  List<int> _screenDurations = []; // seconds per screen
   bool _screensBuilt = false;
 
   final _displayMode = DisplayModeService();
@@ -106,12 +110,7 @@ class _ScreenRotatorState extends State<ScreenRotator> {
       });
     });
 
-    _rotationTimer = Timer.periodic(const Duration(seconds: 30), (_) {
-      if (mounted && _screensBuilt &&
-          _displayMode.mode == DisplayMode.normal) {
-        setState(() => _currentIndex = (_currentIndex + 1) % _screens.length);
-      }
-    });
+    _scheduleNextRotation();
 
     _scheduleMidnightRefresh();
     _schedulePrayerRefresh();
@@ -158,6 +157,20 @@ class _ScreenRotatorState extends State<ScreenRotator> {
     });
   }
 
+  void _scheduleNextRotation() {
+    _rotationTimer?.cancel();
+    if (!_screensBuilt || _screens.isEmpty) return;
+    final duration = _screenDurations.isNotEmpty && _currentIndex < _screenDurations.length
+        ? _screenDurations[_currentIndex]
+        : 30;
+    _rotationTimer = Timer(Duration(seconds: duration), () {
+      if (mounted && _screensBuilt && _displayMode.mode == DisplayMode.normal) {
+        setState(() => _currentIndex = (_currentIndex + 1) % _screens.length);
+      }
+      _scheduleNextRotation();
+    });
+  }
+
   void _listenToSlideChanges() {
     _slidesSubscription = Supabase.instance.client
         .from('slides')
@@ -195,12 +208,18 @@ class _ScreenRotatorState extends State<ScreenRotator> {
       const VerseScreen(),
       ...slides.map((s) => SlidesScreen(slide: s)),
     ];
+    final durations = <int>[
+      30, 30, 30, 30, // prayer, hadith, dua, verse
+      ...slides.map((s) => (s['duration_seconds'] as int?) ?? 30),
+    ];
     if (mounted) {
       setState(() {
         if (_currentIndex >= screens.length && screens.isNotEmpty) _currentIndex = 0;
         _screens = screens;
+        _screenDurations = durations;
         _screensBuilt = true;
       });
+      _scheduleNextRotation();
     }
   }
 

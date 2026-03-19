@@ -30,6 +30,7 @@ class PrayerTimesService {
       final hijri = data['data']['date']['hijri'] as Map<String, dynamic>;
       final hijriDay = hijri['day'] as String;
       final hijriMonth = (hijri['month'] as Map<String, dynamic>)['en'] as String;
+      final hijriMonthNum = int.parse((hijri['month'] as Map<String, dynamic>)['number'].toString());
       final hijriYear = hijri['year'] as String;
       final hijriDate = '$hijriMonth $hijriDay, $hijriYear';
 
@@ -69,6 +70,8 @@ class PrayerTimesService {
         'sunset': _to12(maghribAdhan),
         'jummah': jummah1,
         'hijriDate': hijriDate,
+        'hijriMonth': hijriMonthNum,
+        'hijriDay': int.parse(hijriDay),
       };
     } catch (e) {
       print('Error fetching prayer times: $e');
@@ -147,4 +150,5 @@ class PrayerTimesService {
     if (time.contains('AM') && hour == 12) hour = 0;
     return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
   }
+
 }

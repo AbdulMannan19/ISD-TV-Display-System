@@ -2,16 +2,6 @@ import { NavLink } from 'react-router-dom';
 import { supabase } from '../../supabase';
 import './Sidebar.css';
 
-const MosqueIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="16" height="16">
-    <path d="M12 3C12 3 8 6 8 10V20H16V10C16 6 12 3 12 3Z" />
-    <path d="M4 20V14C4 12 5 11 6 10.5" />
-    <path d="M20 20V14C20 12 19 11 18 10.5" />
-    <path d="M2 20H22" />
-    <circle cx="12" cy="10" r="1.5" />
-  </svg>
-);
-
 const SlidesIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
     <path d="M2 3h20" /><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3" />
@@ -57,10 +47,31 @@ const AlertIcon = () => (
   </svg>
 );
 
+const BookIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+  </svg>
+);
+
+const HeartIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+  </svg>
+);
+
+const BookOpenIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+  </svg>
+);
+
 const navItems = [
   { to: '/prayer-times', label: 'Prayer Times', icon: ClockIcon },
   { to: '/slides', label: 'Slides', icon: SlidesIcon },
   { to: '/alerts', label: 'Alerts', icon: AlertIcon },
+  { to: '/hadiths', label: 'Hadiths', icon: BookIcon },
+  { to: '/duas', label: 'Duas', icon: HeartIcon },
+  { to: '/verses', label: 'Verses', icon: BookOpenIcon },
   { to: '/profile', label: 'Profile', icon: UserIcon },
 ];
 
@@ -69,11 +80,11 @@ export default function Sidebar({ collapsed, onToggle }) {
     <aside className={`sidebar${collapsed ? ' collapsed' : ''}`}>
       <div className="sidebar-brand">
         <div className="sidebar-logo">
-          <MosqueIcon />
+          <img src="/logo.png" alt="ISD" style={{ width: 28, height: 28, borderRadius: 6 }} />
         </div>
         {!collapsed && (
           <div className="sidebar-brand-text">
-            <div className="sidebar-title">ISD Dashboard</div>
+            <div className="sidebar-title">ISD Admin</div>
             <div className="sidebar-sub">Display Manager</div>
           </div>
         )}

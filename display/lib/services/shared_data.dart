@@ -9,6 +9,8 @@ class SharedData {
   String sunset = '';
   String jummah = '';
   String hijriDate = '';
+  int hijriMonth = 1;
+  int hijriDay = 1;
   List<Map<String, String>> prayers = [];
   DateTime? _nextIqamahTarget;
   List<DateTime> _iqamahDateTimes = [];
@@ -33,6 +35,8 @@ class SharedData {
     sunset = data['sunset'] as String;
     jummah = data['jummah'] as String;
     hijriDate = data['hijriDate'] as String;
+    hijriMonth = data['hijriMonth'] as int;
+    hijriDay = data['hijriDay'] as int;
     prayers = (data['prayers'] as List).map((p) => {
       'name': p['name'] as String,
       'adhan': p['adhan'] as String,

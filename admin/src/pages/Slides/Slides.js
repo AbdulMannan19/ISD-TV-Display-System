@@ -44,6 +44,12 @@ const PresentationIcon = () => (
   </svg>
 );
 
+const ClockIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
+    <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+  </svg>
+);
+
 export default function Slides() {
   const [slides, setSlides] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -88,6 +94,12 @@ export default function Slides() {
     await supabase.storage.from('slides').remove([slide.image_url.split('/').pop()]);
     await supabase.from('slides').delete().eq('id', slide.id);
     fetchSlides();
+  };
+
+  const updateDuration = async (id, seconds) => {
+    const val = Math.max(5, Math.min(300, seconds));
+    setSlides(prev => prev.map(s => s.id === id ? { ...s, duration_seconds: val } : s));
+    await supabase.from('slides').update({ duration_seconds: val }).eq('id', id);
   };
 
   const onDragStart = (i) => setDragIdx(i);
@@ -135,6 +147,20 @@ export default function Slides() {
               <button className="slide-delete" onClick={() => deleteSlide(slide)} aria-label={`Delete slide ${i + 1}`}>
                 <TrashIcon />
               </button>
+            </div>
+            <div className="slide-footer">
+              <label className="slide-duration">
+                <ClockIcon />
+                <input
+                  type="number"
+                  min="5"
+                  max="300"
+                  value={slide.duration_seconds || 30}
+                  onChange={e => updateDuration(slide.id, parseInt(e.target.value) || 30)}
+                  className="slide-duration-input"
+                />
+                <span>sec</span>
+              </label>
             </div>
           </div>
         ))}

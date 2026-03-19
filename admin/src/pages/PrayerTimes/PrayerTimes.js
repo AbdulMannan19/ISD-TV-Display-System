@@ -281,7 +281,7 @@ export default function PrayerTimes() {
             ))}
           </select>
           <input type="time" className="pt-input" value={schedTime} onChange={e => setSchedTime(e.target.value)} required />
-          <input type="date" className="pt-input" value={schedDate} onChange={e => setSchedDate(e.target.value)} required />
+          <input type="date" className="pt-input" value={schedDate} onChange={e => setSchedDate(e.target.value)} min={new Date().toISOString().split('T')[0]} required />
           <button className="btn btn-green" type="submit" disabled={schedSaving}>
             {schedSaving ? 'Scheduling...' : 'Schedule'}
           </button>

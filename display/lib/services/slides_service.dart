@@ -8,7 +8,6 @@ class SlidesService {
       final response = await _supabase
           .from('slides')
           .select('id, image_url, display_order, duration_seconds')
-          .eq('is_active', true)
           .order('display_order', ascending: true);
 
       return List<Map<String, dynamic>>.from(response);
