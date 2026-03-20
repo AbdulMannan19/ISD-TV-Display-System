@@ -97,9 +97,23 @@ export default function Slides() {
   };
 
   const updateDuration = async (id, seconds) => {
-    const val = Math.max(5, Math.min(300, seconds));
+    const val = Math.max(5, Math.min(43200, seconds));
     setSlides(prev => prev.map(s => s.id === id ? { ...s, duration_seconds: val } : s));
     await supabase.from('slides').update({ duration_seconds: val }).eq('id', id);
+  };
+
+  const getDurationParts = (totalSec) => {
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    return { h, m };
+  };
+
+  const handleDurationChange = (id, currentSec, field, value) => {
+    const { h, m } = getDurationParts(currentSec);
+    const newH = field === 'h' ? (parseInt(value) || 0) : h;
+    const newM = field === 'm' ? (parseInt(value) || 0) : m;
+    const total = newH * 3600 + newM * 60;
+    updateDuration(id, total || 5);
   };
 
   const onDragStart = (i) => setDragIdx(i);
@@ -153,13 +167,22 @@ export default function Slides() {
                 <ClockIcon />
                 <input
                   type="number"
-                  min="5"
-                  max="300"
-                  value={slide.duration_seconds || 30}
-                  onChange={e => updateDuration(slide.id, parseInt(e.target.value) || 30)}
+                  min="0"
+                  max="12"
+                  value={getDurationParts(slide.duration_seconds || 30).h}
+                  onChange={e => handleDurationChange(slide.id, slide.duration_seconds || 30, 'h', e.target.value)}
                   className="slide-duration-input"
                 />
-                <span>sec</span>
+                <span>hr</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={getDurationParts(slide.duration_seconds || 30).m}
+                  onChange={e => handleDurationChange(slide.id, slide.duration_seconds || 30, 'm', e.target.value)}
+                  className="slide-duration-input"
+                />
+                <span>min</span>
               </label>
             </div>
           </div>
