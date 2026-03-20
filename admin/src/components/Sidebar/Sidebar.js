@@ -22,6 +22,14 @@ const LogOutIcon = () => (
   </svg>
 );
 
+const SupportIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
+  </svg>
+);
+
 const ChevronLeft = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="12" height="12">
     <path d="m15 18-6-6 6-6" />
@@ -104,7 +112,11 @@ export default function Sidebar({ collapsed, onToggle }) {
       </nav>
 
       <div className="sidebar-bottom">
-        <button onClick={() => supabase.auth.signOut()}>
+        <NavLink to="/support" className={({ isActive }) => `sidebar-bottom-link${isActive ? ' active' : ''}`}>
+          <SupportIcon />
+          {!collapsed && <span>Support</span>}
+        </NavLink>
+        <button type="button" onClick={() => supabase.auth.signOut()}>
           <LogOutIcon />
           {!collapsed && <span>Sign Out</span>}
         </button>

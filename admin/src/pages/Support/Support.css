@@ -1,0 +1,53 @@
+.support-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 720px;
+}
+
+.support-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+.support-card-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.support-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.support-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: var(--green-dark);
+}
+
+.support-list li svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  opacity: 0.85;
+}
+
+.support-list a {
+  color: var(--green-dark);
+  font-weight: 500;
+  text-decoration: none;
+  word-break: break-word;
+}
+
+.support-list a:hover {
+  text-decoration: underline;
+}

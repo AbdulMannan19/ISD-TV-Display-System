@@ -57,6 +57,8 @@ const ClockIcon = () => (
   </svg>
 );
 
+const isSlideActive = (slide) => slide.is_active !== false;
+
 export default function Slides() {
   const [slides, setSlides] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -105,7 +107,7 @@ export default function Slides() {
     if (error) { alert(error.message); setUploading(false); return; }
     const url = supabase.storage.from('slides').getPublicUrl(fileName).data.publicUrl;
     const max = slides.length ? Math.max(...slides.map(s => s.display_order)) : 0;
-    await supabase.from('slides').insert({ image_url: url, display_order: max + 1 });
+    await supabase.from('slides').insert({ image_url: url, display_order: max + 1, is_active: true });
     fetchSlides();
     setUploading(false); setShowModal(false);
     setPreviewUrl(''); setPreviewFile(null);
@@ -114,6 +116,16 @@ export default function Slides() {
   const deleteSlide = async (slide) => {
     await supabase.storage.from('slides').remove([slide.image_url.split('/').pop()]);
     await supabase.from('slides').delete().eq('id', slide.id);
+    fetchSlides();
+  };
+
+  const toggleSlideActive = async (slide) => {
+    const next = !isSlideActive(slide);
+    const { error } = await supabase.from('slides').update({ is_active: next }).eq('id', slide.id);
+    if (error) {
+      alert(error.message);
+      return;
+    }
     fetchSlides();
   };
 
@@ -168,7 +180,9 @@ export default function Slides() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Slides</h1>
-          <p className="page-subtitle">Upload and manage presentation slides for your display</p>
+          <p className="page-subtitle">
+            Upload and manage presentation slides for your display. Turn slides off to hide them on TVs without deleting the image.
+          </p>
         </div>
         <button className="btn btn-green" onClick={() => setShowModal(true)}>
           <PlusIcon /> Add Slide
@@ -184,7 +198,7 @@ export default function Slides() {
         {slides.map((slide, i) => (
           <div
             key={slide.id}
-            className={`slide-card${dragIdx === i ? ' dragging' : ''}${overIdx === i ? ' drag-over' : ''}`}
+            className={`slide-card${dragIdx === i ? ' dragging' : ''}${overIdx === i ? ' drag-over' : ''}${!isSlideActive(slide) ? ' slide-card-inactive' : ''}`}
             draggable
             onDragStart={() => onDragStart(i)}
             onDragOver={(e) => onDragOver(e, i)}
@@ -193,11 +207,23 @@ export default function Slides() {
             <div className="slide-preview">
               <img src={slide.image_url} alt={`Slide ${i + 1}`} />
               <div className="slide-badge"><GripIcon /> Slide {i + 1}</div>
+              {!isSlideActive(slide) && <div className="slide-inactive-overlay">Inactive</div>}
               <button className="slide-delete" onClick={() => deleteSlide(slide)} aria-label={`Delete slide ${i + 1}`}>
                 <TrashIcon />
               </button>
             </div>
             <div className="slide-footer">
+              <div className="slide-active-row">
+                <span className="slide-active-label">Display on TV</span>
+                <button
+                  type="button"
+                  className={`slide-active-btn${isSlideActive(slide) ? ' on' : ''}`}
+                  onClick={() => toggleSlideActive(slide)}
+                  aria-pressed={isSlideActive(slide)}
+                >
+                  {isSlideActive(slide) ? 'Active' : 'Inactive'}
+                </button>
+              </div>
               <label className="slide-duration">
                 <ClockIcon />
                 <input

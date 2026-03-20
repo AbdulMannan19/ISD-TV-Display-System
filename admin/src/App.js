@@ -12,6 +12,7 @@ import Alerts from './pages/Alerts/Alerts';
 import Hadiths from './pages/Content/Hadiths';
 import Duas from './pages/Content/Duas';
 import Verses from './pages/Content/Verses';
+import Support from './pages/Support/Support';
 import './App.css';
 
 function AppContent() {
@@ -63,6 +64,7 @@ function AppContent() {
           <Route path="/duas" element={<Duas />} />
           <Route path="/verses" element={<Verses />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/support" element={<Support />} />
           <Route path="*" element={<Navigate to="/prayer-times" />} />
         </Routes>
       </main>
