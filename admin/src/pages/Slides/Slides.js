@@ -105,14 +105,16 @@ export default function Slides() {
   const getDurationParts = (totalSec) => {
     const h = Math.floor(totalSec / 3600);
     const m = Math.floor((totalSec % 3600) / 60);
-    return { h, m };
+    const s = totalSec % 60;
+    return { h, m, s };
   };
 
   const handleDurationChange = (id, currentSec, field, value) => {
-    const { h, m } = getDurationParts(currentSec);
+    const { h, m, s } = getDurationParts(currentSec);
     const newH = field === 'h' ? (parseInt(value) || 0) : h;
     const newM = field === 'm' ? (parseInt(value) || 0) : m;
-    const total = newH * 3600 + newM * 60;
+    const newS = field === 's' ? (parseInt(value) || 0) : s;
+    const total = newH * 3600 + newM * 60 + newS;
     updateDuration(id, total || 5);
   };
 
@@ -183,6 +185,15 @@ export default function Slides() {
                   className="slide-duration-input"
                 />
                 <span>min</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={getDurationParts(slide.duration_seconds || 30).s}
+                  onChange={e => handleDurationChange(slide.id, slide.duration_seconds || 30, 's', e.target.value)}
+                  className="slide-duration-input"
+                />
+                <span>sec</span>
               </label>
             </div>
           </div>
