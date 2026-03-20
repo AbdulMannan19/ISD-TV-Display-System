@@ -22,17 +22,13 @@ function AppContent() {
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   useEffect(() => {
-    // onAuthStateChange fires BEFORE getSession resolves when there's a hash token.
-    // We use it as the single source of truth and only stop loading after it fires.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('[App] Auth event:', event, 'session:', !!session);
       setSession(session);
 
       if (event === 'PASSWORD_RECOVERY') {
         setIsPasswordRecovery(true);
       }
 
-      // Stop loading on any auth event (SIGNED_IN, PASSWORD_RECOVERY, SIGNED_OUT, INITIAL_SESSION)
       setLoading(false);
     });
 
@@ -40,8 +36,6 @@ function AppContent() {
   }, []);
 
   if (loading) return <div className="loading">Loading...</div>;
-
-  console.log('[App] Render - recovery:', isPasswordRecovery, 'session:', !!session);
 
   if (isPasswordRecovery && session) {
     return <UpdatePassword onComplete={() => setIsPasswordRecovery(false)} />;

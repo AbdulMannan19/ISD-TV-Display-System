@@ -15,16 +15,12 @@ class SharedData {
   DateTime? _nextIqamahTarget;
   List<DateTime> _iqamahDateTimes = [];
 
-  /// Full init: fetches prayer times from Aladhan API + iqamah from DB.
-  /// Call ONCE on startup and at midnight (new Gregorian day = new prayer times).
   Future<void> init() async {
     await _fetchFromApi();
     await _loadIqamahFromDb();
     _computeNextTarget();
   }
 
-  /// Refresh only iqamah times from DB (no API call).
-  /// Call when iqamah times change in the database.
   Future<void> refreshIqamah() async {
     await _loadIqamahFromDb();
     _computeNextTarget();
@@ -61,7 +57,6 @@ class SharedData {
         final dt = _parseTime(row['iqamah'] as String, now);
         if (dt != null) times.add(dt);
       }
-      // Also update iqamah in prayers list from DB
       final iqamahMap = <String, String>{};
       for (final row in response as List) {
         iqamahMap[row['prayer'] as String] = row['iqamah'] as String;
@@ -106,9 +101,9 @@ class SharedData {
     if (totalMin >= 60) {
       final hrs = totalMin ~/ 60;
       final mins = totalMin % 60;
-      return mins > 0 ? '${hrs} HR ${mins} MIN' : '${hrs} HR';
+      return mins > 0 ? '$hrs HR $mins MIN' : '$hrs HR';
     }
-    return '${totalMin} MIN';
+    return '$totalMin MIN';
   }
 
   String _to12(String time) {

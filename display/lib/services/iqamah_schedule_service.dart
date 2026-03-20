@@ -11,8 +11,6 @@ class IqamahScheduleService {
     'isha': 'Isha',
   };
 
-  /// Check for scheduled iqamah changes effective today or earlier,
-  /// apply them to prayer_times, create alerts, and delete consumed rows.
   static Future<void> applyScheduledChanges() async {
     try {
       final today = DateTime.now();
@@ -26,7 +24,6 @@ class IqamahScheduleService {
       final rows = response as List;
       if (rows.isEmpty) return;
 
-      // Group changes for the alert message
       final changes = <String>[];
 
       for (final row in rows) {
@@ -34,7 +31,6 @@ class IqamahScheduleService {
         final iqamah = row['iqamah'] as String;
         final id = row['id'];
 
-        // Apply: update prayer_times
         await _supabase
             .from('prayer_times')
             .update({'iqamah': iqamah})
@@ -42,11 +38,9 @@ class IqamahScheduleService {
 
         changes.add('${_labels[prayer] ?? prayer}: $iqamah');
 
-        // Delete consumed row
         await _supabase.from('iqamah_schedule').delete().eq('id', id);
       }
 
-      // Auto-create alert for applied changes
       if (changes.isNotEmpty) {
         final alertText = 'Iqamah time updated — ${changes.join(', ')}';
         final now = DateTime.now().toUtc();
@@ -56,10 +50,6 @@ class IqamahScheduleService {
           'end_time': now.add(const Duration(hours: 24)).toIso8601String(),
         });
       }
-
-      print('Applied ${rows.length} scheduled iqamah changes');
-    } catch (e) {
-      print('Error applying scheduled changes: $e');
-    }
+    } catch (_) {}
   }
 }

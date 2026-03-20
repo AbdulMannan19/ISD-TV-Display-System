@@ -34,9 +34,7 @@ class AlertService {
       final active = (response as List).map((r) => r['text'] as String).toList();
       _currentAlerts = active;
       _controller.add(active);
-    } catch (e) {
-      print('Error fetching alerts: $e');
-    }
+    } catch (_) {}
   }
 
   void dispose() {

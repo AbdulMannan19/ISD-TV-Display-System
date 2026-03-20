@@ -33,15 +33,12 @@ class DailyContentService {
       await prefs.setString(_cacheKey, json.encode(content));
       await prefs.setString(_cacheDateKey, today);
       return content;
-    } catch (e) {
-      print('Error getting $tableName: $e');
+    } catch (_) {
       return _fallback;
     }
   }
 
   Future<Map<String, String>> _fetchFromSupabase() async {
-    // Use hijri month & day directly: id = (month - 1) * 30 + day
-    // 360 rows total (12 months × 30 days), covers every possible hijri date
     final hijriMonth = SharedData.instance.hijriMonth;
     final hijriDay = SharedData.instance.hijriDay;
     final id = (hijriMonth - 1) * 30 + hijriDay;

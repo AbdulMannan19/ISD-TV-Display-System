@@ -19,14 +19,11 @@ class DisplayModeService {
     _onModeChanged = callback;
   }
 
-  /// Refresh iqamah from DB and fully re-evaluate which mode we should be in.
-  /// Clears all current timers/modes and reschedules everything from scratch.
   Future<void> refreshIqamahFromDb() async {
     await SharedData.instance.refreshIqamah();
     reevaluate();
   }
 
-  /// Reset all modes and re-evaluate from scratch based on current SharedData.
   void reevaluate() {
     _silenceTimer?.cancel();
     _prohibitedTimer?.cancel();
@@ -40,7 +37,6 @@ class DisplayModeService {
     _onModeChanged?.call();
   }
 
-  /// Schedule silence exit. Called when silence mode is active.
   void _scheduleSilenceExit() {
     _silenceTimer?.cancel();
     if (mode != DisplayMode.silence || silenceEndTime == null) return;
@@ -60,13 +56,11 @@ class DisplayModeService {
     });
   }
 
-  /// Schedule the next prohibited time screen.
   void scheduleProhibited() {
     _prohibitedTimer?.cancel();
     final now = DateTime.now();
     final shared = SharedData.instance;
 
-    // If currently in prohibited mode, schedule exit
     if (mode == DisplayMode.prohibited && prohibitedEndTime != null) {
       final remaining = prohibitedEndTime!.difference(now);
       if (remaining.isNegative) {
@@ -85,7 +79,6 @@ class DisplayModeService {
       return;
     }
 
-    // Build prohibited windows from SharedData
     final windows = <List<DateTime>>[];
     final sunriseDt = _parseTimeToday(shared.sunrise);
     final sunsetDt = _parseTimeToday(shared.sunset);
@@ -105,7 +98,6 @@ class DisplayModeService {
       windows.add([dhuhrStart.subtract(const Duration(minutes: 15)), dhuhrStart]);
     }
 
-    // Check if currently inside a window
     for (final w in windows) {
       if (now.isAfter(w[0]) && now.isBefore(w[1])) {
         mode = DisplayMode.prohibited;
@@ -116,7 +108,6 @@ class DisplayModeService {
       }
     }
 
-    // Find next upcoming window
     final futureStarts = windows.where((w) => w[0].isAfter(now)).toList();
     if (futureStarts.isEmpty) return;
     futureStarts.sort((a, b) => a[0].compareTo(b[0]));
@@ -156,14 +147,11 @@ class DisplayModeService {
     }
   }
 
-  /// Schedule iqamah lock: 5 min before each iqamah, lock to prayer times screen.
-  /// When lock ends, transitions into silence mode.
   void scheduleIqamahLock() {
     _iqamahLockTimer?.cancel();
     final now = DateTime.now();
     final shared = SharedData.instance;
 
-    // If currently in iqamahLock mode, schedule exit → silence
     if (mode == DisplayMode.iqamahLock && iqamahLockEndTime != null) {
       final remaining = iqamahLockEndTime!.difference(now);
       if (remaining.isNegative) {
@@ -176,20 +164,17 @@ class DisplayModeService {
       return;
     }
 
-    // Build iqamah DateTimes from SharedData's iqamah list
     final iqamahDts = <DateTime>[];
     for (final p in shared.prayers) {
       final dt = _parseTimeToday(p['iqamah']!);
       if (dt != null) iqamahDts.add(dt);
     }
-    // Friday jumu'ah
     if (now.weekday == DateTime.friday && shared.jummah.isNotEmpty) {
       final jDt = _parseTimeToday(shared.jummah);
       if (jDt != null) iqamahDts.add(jDt);
     }
     if (iqamahDts.isEmpty) return;
 
-    // Find next lock window
     final upcoming = <List<DateTime>>[];
     for (final iq in iqamahDts) {
       final lockStart = iq.subtract(const Duration(minutes: 5));

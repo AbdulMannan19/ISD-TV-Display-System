@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// Test overlay with keyboard shortcuts - REMOVE IN PRODUCTION
-/// Arrow keys: navigate screens
-/// Ctrl+S: toggle silence screen
-/// Ctrl+P: toggle prohibited screen
-/// Esc: exit silence/prohibited and return to normal
 class TestControls extends StatelessWidget {
   final VoidCallback onPrevious;
   final VoidCallback onNext;

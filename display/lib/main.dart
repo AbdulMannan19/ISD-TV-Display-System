@@ -26,10 +26,8 @@ Future<void> main() async {
     anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
 
-  // Single API call on startup — populates SharedData with everything
   await SharedData.instance.init();
 
-  // Pre-fetch daily content (uses hijri month/day from SharedData)
   await Future.wait([
     DailyContentService(tableName: 'hadiths', fallback: {'text': '', 'source': ''}).getTodaysContent(),
     DailyContentService(tableName: 'duas', fallback: {'text': '', 'source': ''}).getTodaysContent(),
@@ -84,7 +82,6 @@ class _ScreenRotatorState extends State<ScreenRotator> {
   StreamSubscription? _slidesSubscription;
   StreamSubscription? _prayerTimesSubscription;
 
-  /// Active slide ids in `display_order` after the last successful `_buildScreens` (for remapping index on realtime changes).
   List<Object?> _lastSlideRowIds = [];
   int _slideBuildSeq = 0;
 
@@ -107,7 +104,6 @@ class _ScreenRotatorState extends State<ScreenRotator> {
       if (mounted) setState(() {});
     });
 
-    // SharedData already populated from main() — just schedule timers
     _displayMode.scheduleProhibited();
     _displayMode.scheduleIqamahLock();
 
@@ -116,7 +112,6 @@ class _ScreenRotatorState extends State<ScreenRotator> {
     _scheduleMaghribRefresh();
   }
 
-  // --- Midnight: refresh iqamah schedule + daily content cache ---
   void _scheduleMidnightRefresh() {
     final now = DateTime.now();
     final nextMidnight = DateTime(now.year, now.month, now.day + 1);
@@ -128,16 +123,13 @@ class _ScreenRotatorState extends State<ScreenRotator> {
 
   Future<void> _refreshAtMidnight() async {
     await IqamahScheduleService.applyScheduledChanges();
-    // Full API refresh — new Gregorian day means new prayer times
     await SharedData.instance.init();
     _displayMode.scheduleProhibited();
     _displayMode.scheduleIqamahLock();
-    // Refresh hijri content
     await _fetchDailyContent();
     if (mounted) setState(() {});
   }
 
-  // --- Maghrib+1min: refresh hijri content (Islamic day changes at sunset) ---
   void _scheduleMaghribRefresh() {
     final maghribDt = _parseTimeToday(SharedData.instance.sunset);
     if (maghribDt == null) return;
@@ -145,10 +137,9 @@ class _ScreenRotatorState extends State<ScreenRotator> {
     final now = DateTime.now();
     final refreshTime = maghribDt.add(const Duration(minutes: 1));
 
-    if (refreshTime.isBefore(now)) return; // Already past maghrib today
+    if (refreshTime.isBefore(now)) return;
 
     _maghribRefreshTimer = Timer(refreshTime.difference(now), () async {
-      // Re-fetch API to get tomorrow's hijri date
       await SharedData.instance.init();
       await _fetchDailyContent();
       if (mounted) setState(() {});
@@ -163,7 +154,6 @@ class _ScreenRotatorState extends State<ScreenRotator> {
     ]);
   }
 
-  // --- Realtime: iqamah changes from admin (DB only, no API) ---
   void _listenToPrayerTimesChanges() {
     _prayerTimesSubscription = Supabase.instance.client
         .from('prayer_times')
@@ -173,7 +163,6 @@ class _ScreenRotatorState extends State<ScreenRotator> {
       _prayerTimesDebounce?.cancel();
       _prayerTimesDebounce = Timer(const Duration(seconds: 2), () {
         if (!mounted) return;
-        // DB only — no API call. Reevaluates all modes/timers.
         _displayMode.refreshIqamahFromDb().then((_) {
           if (mounted) setState(() {});
         });
@@ -204,8 +193,6 @@ class _ScreenRotatorState extends State<ScreenRotator> {
         });
   }
 
-  /// When the slide list changes (e.g. `is_active` toggled), keep fixed screens stable and
-  /// map slide indices by id so the current inactive slide is skipped immediately.
   int _remapIndexAfterSlideListChange(
     int oldIndex,
     List<Object?> oldSlideIds,
@@ -229,7 +216,6 @@ class _ScreenRotatorState extends State<ScreenRotator> {
       return _kFixedScreens + newPos;
     }
 
-    // Was showing a slide that is now inactive — same as pressing “next” in rotation: later slides first, else wrap to start.
     for (var i = oldSi + 1; i < oldSlideIds.length; i++) {
       final np = newSlideIds.indexOf(oldSlideIds[i]);
       if (np >= 0) return _kFixedScreens + np;

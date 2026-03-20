@@ -53,9 +53,7 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setResetLoading(true);
-    
-    console.log('[Forgot Password] Sending reset email to:', resetEmail);
-    
+
     const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
       redirectTo: 'https://isd-tv-display-system.vercel.app',
     });
@@ -63,10 +61,8 @@ export default function Login() {
     setResetLoading(false);
     
     if (error) {
-      console.error('[Forgot Password] Error:', error);
       setError(error.message);
     } else {
-      console.log('[Forgot Password] Reset email sent successfully');
       setResetSent(true);
     }
   };

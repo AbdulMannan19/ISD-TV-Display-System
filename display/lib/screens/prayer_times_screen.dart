@@ -31,8 +31,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         .from('prayer_times')
         .stream(primaryKey: ['prayer'])
         .listen((_) {
-          // SharedData.refreshIqamah() is called from main.dart's debounced listener
-          // Just rebuild the UI here
           if (mounted) setState(() {});
         });
   }
@@ -162,7 +160,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           const SizedBox(height: 8),
           const Divider(color: Colors.white24),
           const SizedBox(height: 4),
-          // Each prayer row gets equal space
           ...SharedData.instance.prayers.map((p) => Expanded(child: _prayerRow(p))),
           const SizedBox(height: 12),
           Container(

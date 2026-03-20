@@ -229,7 +229,7 @@ export default function PrayerTimes() {
 
       <div className="pt-info">
         <ClockIcon />
-        <span>Adhan times are fetched automatically from the Aladhan API. Maghrib iqamah is always adhan + 10 min.</span>
+        <span>Adhan (start) times, sunrise, and Hijri date come from the Masjidal API. Iqamah times are set here and stored in the database; they are not taken from Masjidal.</span>
       </div>
 
       <div className="pt-table-wrap">

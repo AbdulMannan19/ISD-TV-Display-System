@@ -1,64 +1,78 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PrayerTimesService {
-  static const String _aladhanApiBase = 'http://api.aladhan.com/v1';
-  static const String _city = 'Denton';
-  static const String _state = 'TX';
-  static const String _country = 'USA';
-  static const int _method = 2;
+  static const String _masjidalRangeUrl = 'https://masjidal.com/api/v1/time/range';
+  static const String _defaultMasjidId = 'O8L7ppA5';
 
   final _supabase = Supabase.instance.client;
 
   Future<Map<String, dynamic>?> fetchPrayerTimes() async {
     try {
-      final now = DateTime.now();
-      final url = Uri.parse(
-        '$_aladhanApiBase/timingsByCity/${now.day}-${now.month}-${now.year}'
-        '?city=$_city&state=$_state&country=$_country&method=$_method',
-      );
-
+      final masjidId = dotenv.env['MASJIDAL_MASJID_ID']?.trim().isNotEmpty == true
+          ? dotenv.env['MASJIDAL_MASJID_ID']!.trim()
+          : _defaultMasjidId;
+      final url = Uri.parse('$_masjidalRangeUrl?masjid_id=$masjidId');
       final response = await http.get(url);
       if (response.statusCode != 200) return null;
 
-      final data = json.decode(response.body);
-      if (data['code'] != 200 || data['data'] == null) return null;
+      final decoded = json.decode(response.body) as Map<String, dynamic>;
+      if (decoded['status'] != 'success' || decoded['data'] == null) return null;
 
-      final timings = data['data']['timings'] as Map<String, dynamic>;
-      final date = data['data']['date']['readable'] as String;
-      final hijri = data['data']['date']['hijri'] as Map<String, dynamic>;
-      final hijriDay = hijri['day'] as String;
-      final hijriMonth = (hijri['month'] as Map<String, dynamic>)['en'] as String;
-      final hijriMonthNum = int.parse((hijri['month'] as Map<String, dynamic>)['number'].toString());
-      final hijriYear = hijri['year'] as String;
-      final hijriDate = '$hijriMonth $hijriDay, $hijriYear';
+      final data = decoded['data'] as Map<String, dynamic>;
+      final salah = data['salah'];
+      if (salah is! List || salah.isEmpty) return null;
 
-      final fajrAdhan = _cleanTime(timings['Fajr']);
-      final dhuhrAdhan = _cleanTime(timings['Dhuhr']);
-      final asrAdhan = _cleanTime(timings['Asr']);
-      final maghribAdhan = _cleanTime(timings['Maghrib']);
-      final ishaAdhan = _cleanTime(timings['Isha']);
-      final sunrise = _cleanTime(timings['Sunrise']);
+      final day = salah.first as Map<String, dynamic>;
 
-      final maghribIqamah = _addMinutes(maghribAdhan, 10);
+      final fajrAdhan = _masjidalTimeTo24(day['fajr'] as String? ?? '');
+      final dhuhrAdhan = _masjidalTimeTo24(day['zuhr'] as String? ?? '');
+      final asrAdhan = _masjidalTimeTo24(day['asr'] as String? ?? '');
+      final maghribAdhan = _masjidalTimeTo24(day['maghrib'] as String? ?? '');
+      final ishaAdhan = _masjidalTimeTo24(day['isha'] as String? ?? '');
+      final sunrise = _masjidalTimeTo24(day['sunrise'] as String? ?? '');
 
-      // Fetch iqamah + jummah times from DB
+      if (fajrAdhan.isEmpty ||
+          dhuhrAdhan.isEmpty ||
+          asrAdhan.isEmpty ||
+          maghribAdhan.isEmpty ||
+          ishaAdhan.isEmpty ||
+          sunrise.isEmpty) {
+        return null;
+      }
+
+      final hijriMonthName = day['hijri_month'] as String? ?? '';
+      final hijriDateRaw = day['hijri_date'] as String? ?? '';
+      final hijriParts = _parseHijriDateParts(hijriDateRaw, hijriMonthName);
+      final hijriDate = hijriParts.formatted;
+      final hijriMonthNum = hijriParts.month;
+      final hijriDayNum = hijriParts.day;
+
       final iqamahTimes = await _fetchIqamahFromDb();
       final fajrIqamah = iqamahTimes['fajr'] ?? _addMinutes(fajrAdhan, 25);
       final dhuhrIqamah = iqamahTimes['zuhr'] ?? _addMinutes(dhuhrAdhan, 19);
       final asrIqamah = iqamahTimes['asr'] ?? _addMinutes(asrAdhan, 19);
       final ishaIqamah = iqamahTimes['isha'] ?? _addMinutes(ishaAdhan, 28);
+      final maghribIqamah = iqamahTimes['maghrib'] ?? _addMinutes(maghribAdhan, 10);
       final jummah1 = iqamahTimes['jummah'] ?? '1:45 PM';
 
-      // Push adhan times + maghrib iqamah to DB
       await _updateDbTimes(
-        fajrAdhan, dhuhrAdhan, asrAdhan, maghribAdhan, ishaAdhan,
-        fajrIqamah, dhuhrIqamah, asrIqamah, maghribIqamah, ishaIqamah,
+        fajrAdhan,
+        dhuhrAdhan,
+        asrAdhan,
+        maghribAdhan,
+        ishaAdhan,
+        fajrIqamah,
+        dhuhrIqamah,
+        asrIqamah,
+        maghribIqamah,
+        ishaIqamah,
       );
 
       return {
-        'date': date,
+        'date': day['date'] as String? ?? '',
         'prayers': [
           {'name': 'FAJR', 'adhan': _to12(fajrAdhan), 'iqamah': fajrIqamah},
           {'name': 'DHUHR', 'adhan': _to12(dhuhrAdhan), 'iqamah': dhuhrIqamah},
@@ -71,12 +85,84 @@ class PrayerTimesService {
         'jummah': jummah1,
         'hijriDate': hijriDate,
         'hijriMonth': hijriMonthNum,
-        'hijriDay': int.parse(hijriDay),
+        'hijriDay': hijriDayNum,
       };
-    } catch (e) {
-      print('Error fetching prayer times: $e');
+    } catch (_) {
       return null;
     }
+  }
+
+  String _masjidalTimeTo24(String raw) {
+    final normalized = _normalizeMasjidalTime(raw);
+    if (normalized.isEmpty) return '';
+    return _to24(normalized);
+  }
+
+  String _normalizeMasjidalTime(String raw) {
+    var s = raw.trim();
+    if (s.isEmpty) return '';
+    s = s.replaceAllMapped(
+      RegExp(r'(\d{1,2}:\d{2})\s*(AM|PM)', caseSensitive: false),
+      (m) => '${m[1]} ${m[2]!.toUpperCase()}',
+    );
+    return s;
+  }
+
+  ({String formatted, int month, int day}) _parseHijriDateParts(
+    String hijriDateRaw,
+    String hijriMonthEn,
+  ) {
+    var day = 1;
+    var year = '';
+    final comma = hijriDateRaw.split(',');
+    if (comma.isNotEmpty) {
+      final d = int.tryParse(comma.first.trim());
+      if (d != null) day = d;
+    }
+    if (comma.length > 1) {
+      year = comma[1].trim();
+    }
+    final monthNum = _hijriMonthNumberFromEnglish(hijriMonthEn);
+    final formatted = year.isNotEmpty
+        ? '$hijriMonthEn $day, $year'
+        : '$hijriMonthEn $day';
+    return (formatted: formatted, month: monthNum, day: day);
+  }
+
+  int _hijriMonthNumberFromEnglish(String en) {
+    if (en.isEmpty) return 1;
+    final k = en.toLowerCase().replaceAll(RegExp(r"['\u2019]"), '').replaceAll('-', ' ');
+    const map = {
+      'muharram': 1,
+      'safar': 2,
+      'rabi al awwal': 3,
+      'rabi al thani': 4,
+      'rabialawwal': 3,
+      'rabialthani': 4,
+      'jumada al awwal': 5,
+      'jumada al thani': 6,
+      'jumada al awula': 5,
+      'jumada al akhira': 6,
+      'rajab': 7,
+      'shaban': 8,
+      'sha ban': 8,
+      'ramadan': 9,
+      'ramadhan': 9,
+      'shawwal': 10,
+      'dhul qadah': 11,
+      'dhu al qidah': 11,
+      'dhul hijjah': 12,
+      'dhu al hijjah': 12,
+      'dhulhijjah': 12,
+    };
+    for (final e in map.entries) {
+      if (k == e.key || k.replaceAll(' ', '') == e.key.replaceAll(' ', '')) {
+        return e.value;
+      }
+    }
+    if (k.contains('shawwal')) return 10;
+    if (k.contains('ramadan')) return 9;
+    return 1;
   }
 
   Future<Map<String, String>> _fetchIqamahFromDb() async {
@@ -90,20 +176,22 @@ class PrayerTimesService {
         times[row['prayer'] as String] = _to12(row['iqamah'] as String);
       }
       return times;
-    } catch (e) {
-      print('Error fetching iqamah from DB: $e');
+    } catch (_) {
       return {};
     }
   }
 
-  /// Fetches only iqamah times from DB (no API call). Returns a map of prayer name -> iqamah time in 12h format.
-  Future<Map<String, String>> fetchIqamahOnly() async {
-    return _fetchIqamahFromDb();
-  }
-
   Future<void> _updateDbTimes(
-    String fajrA, String zuhrA, String asrA, String maghribA, String ishaA,
-    String fajrI, String zuhrI, String asrI, String maghribI, String ishaI,
+    String fajrA,
+    String zuhrA,
+    String asrA,
+    String maghribA,
+    String ishaA,
+    String fajrI,
+    String zuhrI,
+    String asrI,
+    String maghribI,
+    String ishaI,
   ) async {
     try {
       final rows = [
@@ -114,12 +202,8 @@ class PrayerTimesService {
         {'prayer': 'isha', 'adhan': ishaA, 'iqamah': _to24(ishaI)},
       ];
       await _supabase.from('prayer_times').upsert(rows);
-    } catch (e) {
-      print('Error updating prayer times in DB: $e');
-    }
+    } catch (_) {}
   }
-
-  String _cleanTime(String time) => time.split(' ')[0];
 
   String _addMinutes(String time24, int minutes) {
     final parts = time24.split(':');
@@ -150,5 +234,4 @@ class PrayerTimesService {
     if (time.contains('AM') && hour == 12) hour = 0;
     return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
   }
-
 }

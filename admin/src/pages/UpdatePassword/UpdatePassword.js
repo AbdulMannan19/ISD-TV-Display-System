@@ -56,11 +56,9 @@ export default function UpdatePassword({ onComplete }) {
     const { error } = await supabase.auth.updateUser({ password });
 
     if (error) {
-      console.error('[UpdatePassword] Error:', error);
       setError(error.message);
       setLoading(false);
     } else {
-      console.log('[UpdatePassword] Password updated successfully');
       window.location.hash = '';
       if (onComplete) onComplete();
       navigate('/profile');

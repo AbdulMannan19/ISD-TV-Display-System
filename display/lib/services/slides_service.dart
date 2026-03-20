@@ -13,13 +13,8 @@ class SlidesService {
       return List<Map<String, dynamic>>.from(response)
           .where((row) => row['is_active'] != false)
           .toList();
-    } catch (e) {
-      print('Error fetching slides: $e');
+    } catch (_) {
       return [];
     }
-  }
-
-  String getPublicUrl(String imagePath) {
-    return _supabase.storage.from('slides').getPublicUrl(imagePath);
   }
 }

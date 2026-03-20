@@ -26,8 +26,6 @@ class _ProhibitedTimeScreenState extends State<ProhibitedTimeScreen> {
 
   void _updateRemainingTime() {
     final remaining = widget.endTime.difference(DateTime.now());
-    // Floor minutes mis-reported sub-minute time; ceil fixes that. Never show 0: at 0s the
-    // app leaves this screen, but a tick can still run first—clamp(1, 15) avoids a "0" flash.
     final secs = remaining.inSeconds < 0 ? 0 : remaining.inSeconds;
     _remainingMinutes = (secs / 60).ceil().clamp(1, 15);
   }
