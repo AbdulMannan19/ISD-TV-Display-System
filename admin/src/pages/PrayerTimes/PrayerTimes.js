@@ -181,15 +181,32 @@ export default function PrayerTimes() {
     if (error) {
       alert('Error scheduling: ' + error.message);
     } else {
-      // Auto-create alert: starts 2 days before effective_date, ends on effective_date
+      // Club alerts for same effective_date into one
       const effectiveDate = new Date(schedDate + 'T00:00:00');
       const alertStart = new Date(effectiveDate.getTime() - 2 * 24 * 60 * 60 * 1000);
-      const alertText = `Starting ${formatDate(schedDate)}: ${LABELS[schedPrayer]} iqamah changing to ${to12(schedTime)}`;
-      await supabase.from('alerts').insert({
-        text: alertText,
-        start_time: alertStart.toISOString(),
-        end_time: effectiveDate.toISOString(),
-      });
+      const prefix = `Starting ${formatDate(schedDate)}:`;
+
+      // Check for existing alert for this date
+      const { data: existing } = await supabase.from('alerts')
+        .select('id, text')
+        .like('text', `${prefix}%`);
+
+      const newPart = `${LABELS[schedPrayer]} iqamah → ${to12(schedTime)}`;
+
+      if (existing && existing.length > 0) {
+        // Merge into existing alert
+        const alertText = `${existing[0].text}, ${newPart}`;
+        await supabase.from('alerts').update({
+          text: alertText,
+        }).eq('id', existing[0].id);
+      } else {
+        const alertText = `${prefix} ${newPart}`;
+        await supabase.from('alerts').insert({
+          text: alertText,
+          start_time: alertStart.toISOString(),
+          end_time: effectiveDate.toISOString(),
+        });
+      }
 
       setSchedTime('');
       setSchedDate('');
@@ -206,7 +223,9 @@ export default function PrayerTimes() {
   const formatDate = (d) => {
     const [y, m, day] = d.split('-');
     const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return `${mon[parseInt(m) - 1]} ${parseInt(day)}, ${y}`;
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const dt = new Date(parseInt(y), parseInt(m) - 1, parseInt(day));
+    return `${days[dt.getDay()]}, ${mon[parseInt(m) - 1]} ${parseInt(day)}`;
   };
 
   if (loading) return <div className="loading">Loading...</div>;

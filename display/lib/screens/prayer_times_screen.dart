@@ -177,12 +177,12 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 36,
+                    fontSize: 15,
                     letterSpacing: 3,
                   ),
                 ),
                 const SizedBox(width: 20),
-                _timeCell(SharedData.instance.jummah),
+                _subscriptTime(SharedData.instance.jummah, 28, FontWeight.w600),
               ],
             ),
           ),
@@ -202,7 +202,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               style: TextStyle(
                 color: Colors.white.withOpacity(0.7),
                 fontWeight: FontWeight.bold,
-                fontSize: 36,
+                fontSize: 15,
                 letterSpacing: 1.5,
               ),
             ),
@@ -333,8 +333,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _sunInfo('☀️', 'SUNRISE', SharedData.instance.sunrise),
-              _sunInfo('🌅', 'SUNSET', SharedData.instance.sunset),
+              _sunInfo('SUNRISE', SharedData.instance.sunrise),
+              _sunInfo('SUNSET', SharedData.instance.sunset),
             ],
           ),
           const SizedBox(height: 12),
@@ -378,11 +378,9 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     );
   }
 
-  Widget _sunInfo(String icon, String label, String time) {
+  Widget _sunInfo(String label, String time) {
     return Column(
       children: [
-        Text(icon, style: const TextStyle(fontSize: 20)),
-        const SizedBox(height: 4),
         Text(
           label,
           style: TextStyle(
