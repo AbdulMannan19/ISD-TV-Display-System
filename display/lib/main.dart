@@ -114,8 +114,8 @@ class _ScreenRotatorState extends State<ScreenRotator> {
 
   void _scheduleMidnightRefresh() {
     final now = DateTime.now();
-    final nextMidnight = DateTime(now.year, now.month, now.day + 1);
-    _midnightTimer = Timer(nextMidnight.difference(now), () {
+    final next1230Am = DateTime(now.year, now.month, now.day + 1, 0, 30);
+    _midnightTimer = Timer(next1230Am.difference(now), () {
       _refreshAtMidnight();
       _midnightTimer = Timer.periodic(const Duration(hours: 24), (_) => _refreshAtMidnight());
     });

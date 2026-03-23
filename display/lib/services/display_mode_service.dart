@@ -207,7 +207,7 @@ class DisplayModeService {
     final isFridayJummah = DateTime.now().weekday == DateTime.friday &&
         SharedData.instance.jummah.isNotEmpty &&
         _parseTimeToday(SharedData.instance.jummah) == iqamahTime;
-    final duration = isFridayJummah ? 45 : 15;
+    final duration = isFridayJummah ? 45 : 10;
 
     mode = DisplayMode.silence;
     silenceEndTime = DateTime.now().add(Duration(minutes: duration));
