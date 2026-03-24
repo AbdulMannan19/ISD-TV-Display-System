@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'prayer_times_service.dart';
+import 'daily_content_service.dart';
 
 class SharedData {
   SharedData._();
@@ -15,6 +16,10 @@ class SharedData {
   DateTime? _nextIqamahTarget;
   List<DateTime> _iqamahDateTimes = [];
 
+  Map<String, String> currentHadith = {'text': '', 'source': ''};
+  Map<String, String> currentDua = {'text': '', 'source': ''};
+  Map<String, String> currentVerse = {'text': '', 'source': ''};
+
   Future<void> init() async {
     await _fetchFromApi();
     await _loadIqamahFromDb();
@@ -24,6 +29,14 @@ class SharedData {
   Future<void> refreshIqamah() async {
     await _loadIqamahFromDb();
     _computeNextTarget();
+  }
+
+  Future<void> fetchDailyContent() async {
+    try {
+      currentHadith = await DailyContentService(tableName: 'hadiths', fallback: {'text': '', 'source': ''}).getTodaysContent();
+      currentDua = await DailyContentService(tableName: 'duas', fallback: {'text': '', 'source': ''}).getTodaysContent();
+      currentVerse = await DailyContentService(tableName: 'verses', fallback: {'text': '', 'source': ''}).getTodaysContent();
+    } catch (_) {}
   }
 
   Future<void> _fetchFromApi() async {

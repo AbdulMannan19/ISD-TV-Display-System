@@ -10,7 +10,6 @@ import 'screens/verse_screen.dart';
 import 'screens/slides_screen.dart';
 import 'screens/silence_screen.dart';
 import 'screens/prohibited_time_screen.dart';
-import 'services/daily_content_service.dart';
 import 'services/slides_service.dart';
 import 'services/shared_data.dart';
 import 'services/display_mode_service.dart';
@@ -27,12 +26,7 @@ Future<void> main() async {
   );
 
   await SharedData.instance.init();
-
-  await Future.wait([
-    DailyContentService(tableName: 'hadiths', fallback: {'text': '', 'source': ''}).getTodaysContent(),
-    DailyContentService(tableName: 'duas', fallback: {'text': '', 'source': ''}).getTodaysContent(),
-    DailyContentService(tableName: 'verses', fallback: {'text': '', 'source': ''}).getTodaysContent(),
-  ]);
+  await SharedData.instance.fetchDailyContent();
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   SystemChrome.setPreferredOrientations([
@@ -114,8 +108,9 @@ class _ScreenRotatorState extends State<ScreenRotator> {
 
   void _scheduleMidnightRefresh() {
     final now = DateTime.now();
-    final next1230Am = DateTime(now.year, now.month, now.day + 1, 0, 30);
-    _midnightTimer = Timer(next1230Am.difference(now), () {
+    // 12:01 AM — 1 min buffer to ensure Gregorian date has changed
+    final next = DateTime(now.year, now.month, now.day + 1, 0, 1);
+    _midnightTimer = Timer(next.difference(now), () {
       _refreshAtMidnight();
       _midnightTimer = Timer.periodic(const Duration(hours: 24), (_) => _refreshAtMidnight());
     });
@@ -126,7 +121,6 @@ class _ScreenRotatorState extends State<ScreenRotator> {
     await SharedData.instance.init();
     _displayMode.scheduleProhibited();
     _displayMode.scheduleIqamahLock();
-    await _fetchDailyContent();
     if (mounted) setState(() {});
   }
 
@@ -140,18 +134,11 @@ class _ScreenRotatorState extends State<ScreenRotator> {
     if (refreshTime.isBefore(now)) return;
 
     _maghribRefreshTimer = Timer(refreshTime.difference(now), () async {
+      // Hijri date changes at sunset — fetch new daily content
       await SharedData.instance.init();
-      await _fetchDailyContent();
+      await SharedData.instance.fetchDailyContent();
       if (mounted) setState(() {});
     });
-  }
-
-  Future<void> _fetchDailyContent() async {
-    await Future.wait([
-      DailyContentService(tableName: 'hadiths', fallback: {'text': '', 'source': ''}).getTodaysContent(),
-      DailyContentService(tableName: 'duas', fallback: {'text': '', 'source': ''}).getTodaysContent(),
-      DailyContentService(tableName: 'verses', fallback: {'text': '', 'source': ''}).getTodaysContent(),
-    ]);
   }
 
   void _listenToPrayerTimesChanges() {
