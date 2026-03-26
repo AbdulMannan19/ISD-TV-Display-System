@@ -1,0 +1,129 @@
+.embed-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #000428, #004E92, #001F54);
+  padding: 20px;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+}
+
+.embed-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000428;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.embed-card {
+  width: 100%;
+  max-width: 420px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.embed-header {
+  padding: 20px 24px 16px;
+  text-align: center;
+}
+
+.embed-title {
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.embed-date {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+.embed-hijri {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+
+.embed-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.embed-table thead th {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.embed-table thead th:first-child {
+  text-align: left;
+  padding-left: 24px;
+}
+
+.embed-table tbody td {
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 500;
+  padding: 12px 16px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.embed-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.embed-prayer-name {
+  text-align: left !important;
+  padding-left: 24px !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
+  letter-spacing: 0.5px;
+}
+
+.embed-iqamah {
+  font-weight: 700 !important;
+}
+
+.embed-jummah {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 12px 16px 16px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+.embed-jummah-label {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 1px;
+}
+
+.embed-jummah-time {
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.embed-sunrise-row td {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 0.95rem !important;
+}

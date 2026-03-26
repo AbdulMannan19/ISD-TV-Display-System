@@ -13,6 +13,7 @@ import Hadiths from './pages/Content/Hadiths';
 import Duas from './pages/Content/Duas';
 import Verses from './pages/Content/Verses';
 import Support from './pages/Support/Support';
+import EmbedPrayerTimes from './pages/Embed/EmbedPrayerTimes';
 import './App.css';
 
 function AppContent() {
@@ -69,7 +70,10 @@ function AppContent() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <Routes>
+        <Route path="/embed/prayer-times" element={<EmbedPrayerTimes />} />
+        <Route path="*" element={<AppContent />} />
+      </Routes>
     </BrowserRouter>
   );
 }
