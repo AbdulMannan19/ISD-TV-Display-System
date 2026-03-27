@@ -43,7 +43,7 @@ export default function EmbedPrayerTimes() {
           setHijriDate(year ? `${month} ${dayNum}, ${year}` : `${month} ${dayNum}`);
           setSunrise(day.sunrise || '');
         }
-      } catch (_) {}
+      } catch (_) { }
     };
 
     const init = async () => {
@@ -69,6 +69,7 @@ export default function EmbedPrayerTimes() {
       <div className="embed-card">
         <div className="embed-header">
           <div className="embed-title">Prayer Times</div>
+          <div className="embed-subtitle">Islamic Society of Denton</div>
           <div className="embed-date">{formatDate(now)}</div>
           {hijriDate && <div className="embed-hijri">{hijriDate}</div>}
         </div>
@@ -82,23 +83,28 @@ export default function EmbedPrayerTimes() {
             </tr>
           </thead>
           <tbody>
-            {sunrise && (
-              <tr className="embed-sunrise-row">
-                <td className="embed-prayer-name">☀️ Sunrise</td>
-                <td>{to12(sunrise)}</td>
-                <td></td>
-              </tr>
-            )}
             {PRAYERS.map(p => {
               const t = times[p];
               if (!t) return null;
-              return (
+              const row = (
                 <tr key={p}>
                   <td className="embed-prayer-name">{LABELS[p]}</td>
                   <td>{to12(t.adhan)}</td>
                   <td className="embed-iqamah">{to12(t.iqamah)}</td>
                 </tr>
               );
+
+              if (p === 'fajr' && sunrise) {
+                return [
+                  row,
+                  <tr key="sunrise" className="embed-sunrise-row">
+                    <td className="embed-prayer-name">Sunrise</td>
+                    <td colSpan="2">{to12(sunrise)}</td>
+                  </tr>
+                ];
+              }
+
+              return row;
             })}
           </tbody>
         </table>
@@ -115,7 +121,7 @@ export default function EmbedPrayerTimes() {
 }
 
 function formatDate(dt) {
-  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   return `${days[dt.getDay()]}, ${months[dt.getMonth()]} ${dt.getDate()}, ${dt.getFullYear()}`;
 }
