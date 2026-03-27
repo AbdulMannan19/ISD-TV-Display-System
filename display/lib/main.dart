@@ -145,6 +145,8 @@ class _ScreenRotatorState extends State<ScreenRotator> {
     await SharedData.instance.init();
     _displayMode.scheduleProhibited();
     _displayMode.scheduleIqamahLock();
+    _maghribRefreshTimer?.cancel();
+    _scheduleMaghribRefresh();
     if (mounted) setState(() {});
   }
 
