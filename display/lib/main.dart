@@ -74,7 +74,6 @@ class _ScreenRotatorState extends State<ScreenRotator> {
   Timer? _midnightTimer;
   Timer? _maghribRefreshTimer;
   Timer? _prayerTimesDebounce;
-  Timer? _pollTimer;
   RealtimeChannel? _prayerTimesChannel;
   RealtimeChannel? _slidesChannel;
 
@@ -106,28 +105,6 @@ class _ScreenRotatorState extends State<ScreenRotator> {
     _scheduleNextRotation();
     _scheduleMidnightRefresh();
     _scheduleMaghribRefresh();
-    _startPolling();
-  }
-
-  void _startPolling() {
-    _pollTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
-      if (!mounted) return;
-      // Snapshot old iqamah times before refresh
-      final oldIqamahs = SharedData.instance.prayers
-          .map((p) => '${p['name']}:${p['iqamah']}')
-          .join(',');
-      await SharedData.instance.refreshIqamah();
-      final newIqamahs = SharedData.instance.prayers
-          .map((p) => '${p['name']}:${p['iqamah']}')
-          .join(',');
-      // Only reevaluate if iqamah times actually changed
-      if (oldIqamahs != newIqamahs) {
-        _displayMode.reevaluate();
-      }
-      await _buildScreens();
-      await AlertService.instance.refreshAlerts();
-      if (mounted) setState(() {});
-    });
   }
 
   void _scheduleMidnightRefresh() {
@@ -310,7 +287,6 @@ class _ScreenRotatorState extends State<ScreenRotator> {
     _rotationTimer?.cancel();
     _midnightTimer?.cancel();
     _maghribRefreshTimer?.cancel();
-    _pollTimer?.cancel();
     if (_slidesChannel != null) {
       Supabase.instance.client.removeChannel(_slidesChannel!);
     }
