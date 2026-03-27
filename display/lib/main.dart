@@ -112,7 +112,18 @@ class _ScreenRotatorState extends State<ScreenRotator> {
   void _startPolling() {
     _pollTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
       if (!mounted) return;
-      await _displayMode.refreshIqamahFromDb();
+      // Snapshot old iqamah times before refresh
+      final oldIqamahs = SharedData.instance.prayers
+          .map((p) => '${p['name']}:${p['iqamah']}')
+          .join(',');
+      await SharedData.instance.refreshIqamah();
+      final newIqamahs = SharedData.instance.prayers
+          .map((p) => '${p['name']}:${p['iqamah']}')
+          .join(',');
+      // Only reevaluate if iqamah times actually changed
+      if (oldIqamahs != newIqamahs) {
+        _displayMode.reevaluate();
+      }
       await _buildScreens();
       await AlertService.instance.refreshAlerts();
       if (mounted) setState(() {});
