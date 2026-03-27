@@ -74,8 +74,8 @@ class _ScreenRotatorState extends State<ScreenRotator> {
   Timer? _midnightTimer;
   Timer? _maghribRefreshTimer;
   Timer? _prayerTimesDebounce;
-  StreamSubscription? _slidesSubscription;
-  StreamSubscription? _prayerTimesSubscription;
+  RealtimeChannel? _prayerTimesChannel;
+  RealtimeChannel? _slidesChannel;
 
   List<Object?> _lastSlideRowIds = [];
   int _slideBuildSeq = 0;
@@ -143,19 +143,24 @@ class _ScreenRotatorState extends State<ScreenRotator> {
   }
 
   void _listenToPrayerTimesChanges() {
-    _prayerTimesSubscription = Supabase.instance.client
-        .from('prayer_times')
-        .stream(primaryKey: ['id'])
-        .listen((_) {
-      if (!mounted) return;
-      _prayerTimesDebounce?.cancel();
-      _prayerTimesDebounce = Timer(const Duration(seconds: 2), () {
-        if (!mounted) return;
-        _displayMode.refreshIqamahFromDb().then((_) {
-          if (mounted) setState(() {});
-        });
-      });
-    });
+    _prayerTimesChannel = Supabase.instance.client
+        .channel('prayer_times_changes')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'prayer_times',
+          callback: (payload) {
+            if (!mounted) return;
+            _prayerTimesDebounce?.cancel();
+            _prayerTimesDebounce = Timer(const Duration(seconds: 1), () {
+              if (!mounted) return;
+              _displayMode.refreshIqamahFromDb().then((_) {
+                if (mounted) setState(() {});
+              });
+            });
+          },
+        )
+        .subscribe();
   }
 
   void _scheduleNextRotation() {
@@ -173,12 +178,17 @@ class _ScreenRotatorState extends State<ScreenRotator> {
   }
 
   void _listenToSlideChanges() {
-    _slidesSubscription = Supabase.instance.client
-        .from('slides')
-        .stream(primaryKey: ['id'])
-        .listen((_) {
-          if (mounted) _buildScreens();
-        });
+    _slidesChannel = Supabase.instance.client
+        .channel('slides_changes')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'slides',
+          callback: (payload) {
+            if (mounted) _buildScreens();
+          },
+        )
+        .subscribe();
   }
 
   int _remapIndexAfterSlideListChange(
@@ -229,8 +239,8 @@ class _ScreenRotatorState extends State<ScreenRotator> {
       ...slides.map((s) {
         final mode = (s['display_mode'] as String?) ?? 'full';
         return mode == 'split'
-            ? SplitSlideScreen(key: ValueKey(s['id']), slide: s)
-            : SlidesScreen(key: ValueKey(s['id']), slide: s);
+            ? SplitSlideScreen(key: ValueKey('${s['id']}_split'), slide: s)
+            : SlidesScreen(key: ValueKey('${s['id']}_full'), slide: s);
       }),
     ];
     final durations = <int>[
@@ -275,8 +285,12 @@ class _ScreenRotatorState extends State<ScreenRotator> {
     _rotationTimer?.cancel();
     _midnightTimer?.cancel();
     _maghribRefreshTimer?.cancel();
-    _slidesSubscription?.cancel();
-    _prayerTimesSubscription?.cancel();
+    if (_slidesChannel != null) {
+      Supabase.instance.client.removeChannel(_slidesChannel!);
+    }
+    if (_prayerTimesChannel != null) {
+      Supabase.instance.client.removeChannel(_prayerTimesChannel!);
+    }
     _prayerTimesDebounce?.cancel();
     _alertSubscription?.cancel();
     AlertService.instance.dispose();

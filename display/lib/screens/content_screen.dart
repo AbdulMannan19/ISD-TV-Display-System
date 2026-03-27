@@ -174,24 +174,17 @@ class _ContentScreenState extends State<ContentScreen> {
         children: [
           Column(children: [
             Container(
-              width: 80, height: 80,
-              decoration: const BoxDecoration(color: Colors.white),
-              child: Image.asset('assets/images/qr_code.jpeg', fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.qr_code_2, size: 50, color: Colors.black54))),
-            ),
-            const SizedBox(height: 8),
-            Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(border: Border.all(color: Colors.white38), borderRadius: BorderRadius.circular(8)),
               child: const Text('Islamic Society of Denton', textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600)),
+                style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(_formatDate(_now), textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 10, letterSpacing: 0.5)),
+              style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13, letterSpacing: 0.5)),
             if (shared.hijriDate.isNotEmpty)
               Text(shared.hijriDate, textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 10, letterSpacing: 0.5)),
+                style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12, letterSpacing: 0.5)),
           ]),
           Column(children: [
             _buildClock(),
@@ -302,9 +295,9 @@ class _ContentScreenState extends State<ContentScreen> {
 
   Widget _sunInfo(String label, String time) {
     return Column(children: [
-      Text(label, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 9, letterSpacing: 1.5, fontWeight: FontWeight.w600)),
+      Text(label, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.w600)),
       const SizedBox(height: 2),
-      _subscriptTime(time, 15, FontWeight.w500),
+      _subscriptTime(time, 18, FontWeight.w500),
     ]);
   }
 

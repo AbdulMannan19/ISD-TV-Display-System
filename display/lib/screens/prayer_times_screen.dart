@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/shared_data.dart';
 import 'settings_screen.dart';
 
@@ -14,7 +13,6 @@ class PrayerTimesScreen extends StatefulWidget {
 class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   late Timer _timer;
   late DateTime _now;
-  StreamSubscription? _iqamahSubscription;
 
   @override
   void initState() {
@@ -23,22 +21,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       setState(() => _now = DateTime.now());
     });
-    _listenToIqamahChanges();
-  }
-
-  void _listenToIqamahChanges() {
-    _iqamahSubscription = Supabase.instance.client
-        .from('prayer_times')
-        .stream(primaryKey: ['prayer'])
-        .listen((_) {
-          if (mounted) setState(() {});
-        });
   }
 
   @override
   void dispose() {
     _timer.cancel();
-    _iqamahSubscription?.cancel();
     super.dispose();
   }
 
@@ -202,7 +189,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               style: TextStyle(
                 color: Colors.white.withOpacity(0.7),
                 fontWeight: FontWeight.bold,
-                fontSize: 18,
+                fontSize: 20,
                 letterSpacing: 1.5,
               ),
             ),
@@ -333,8 +320,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _sunInfo('☀️', 'SUNRISE', SharedData.instance.sunrise),
-              _sunInfo('🌅', 'SUNSET', SharedData.instance.sunset),
+              _sunInfo('SUNRISE', SharedData.instance.sunrise),
+              _sunInfo('SUNSET', SharedData.instance.sunset),
             ],
           ),
           const SizedBox(height: 12),
@@ -378,11 +365,9 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     );
   }
 
-  Widget _sunInfo(String icon, String label, String time) {
+  Widget _sunInfo(String label, String time) {
     return Column(
       children: [
-        Text(icon, style: const TextStyle(fontSize: 20)),
-        const SizedBox(height: 4),
         Text(
           label,
           style: TextStyle(
