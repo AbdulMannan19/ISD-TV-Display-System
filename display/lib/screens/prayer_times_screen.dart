@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../services/shared_data.dart';
+import '../services/theme_service.dart';
+import '../theme/theme_config.dart';
 import 'settings_screen.dart';
 
 class PrayerTimesScreen extends StatefulWidget {
@@ -45,69 +47,62 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   @override
   Widget build(BuildContext context) {
     final shared = SharedData.instance;
+    final theme = ThemeService().current;
+    
     if (shared.prayers.isEmpty) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF000428),
+      return Scaffold(
+        backgroundColor: theme.bg,
         body: Center(
-          child: CircularProgressIndicator(color: Colors.white),
+          child: CircularProgressIndicator(color: theme.accent),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF000428),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF000428), Color(0xFF004E92), Color(0xFF001F54)],
-          ),
-        ),
-        child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return constraints.maxWidth > 650 ? _buildWide() : _buildNarrow();
-            },
-          ),
+      backgroundColor: theme.bg,
+      body: ThemeService().buildBackground(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return constraints.maxWidth > 650 ? _buildWide(theme) : _buildNarrow(theme);
+          },
         ),
       ),
     );
   }
 
-  Widget _buildWide() {
+  Widget _buildWide(ThemeConfig theme) {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(flex: 3, child: _buildPrayerTable()),
+          Expanded(flex: 3, child: _buildPrayerTable(theme)),
           const SizedBox(width: 16),
-          Expanded(flex: 2, child: _buildRightPanel()),
+          Expanded(flex: 2, child: _buildRightPanel(theme)),
         ],
       ),
     );
   }
 
-  Widget _buildNarrow() {
+  Widget _buildNarrow(ThemeConfig theme) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          _buildPrayerTable(),
+          _buildPrayerTable(theme),
           const SizedBox(height: 16),
-          _buildRightPanel(),
+          _buildRightPanel(theme),
         ],
       ),
     );
   }
 
-  Widget _buildPrayerTable() {
+  Widget _buildPrayerTable(ThemeConfig theme) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.07),
+        color: theme.text.withOpacity(0.04),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.15)),
+        border: Border.all(color: theme.text.withOpacity(0.08)),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -122,7 +117,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   'STARTS',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.55),
+                    color: theme.textMuted,
                     fontSize: 14,
                     letterSpacing: 2,
                     fontWeight: FontWeight.w600,
@@ -135,7 +130,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   'IQAMAH',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.55),
+                    color: theme.accent,
                     fontSize: 14,
                     letterSpacing: 2,
                     fontWeight: FontWeight.w600,
@@ -145,31 +140,36 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          const Divider(color: Colors.white24),
+          Divider(color: theme.text.withOpacity(0.1)),
           const SizedBox(height: 4),
-          ...SharedData.instance.prayers.map((p) => Expanded(child: _prayerRow(p))),
+          ...SharedData.instance.prayers.asMap().entries.map((e) {
+            final idx      = e.key;
+            final isCurrent = idx == SharedData.instance.getCurrentPrayerIndex();
+            final isNext    = idx == SharedData.instance.getNextPrayerIndex();
+            return Expanded(child: _prayerRow(e.value, theme, isCurrent: isCurrent, isNext: isNext));
+          }),
           const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: theme.accent.withOpacity(0.06),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.white.withOpacity(0.15)),
+              border: Border.all(color: theme.accent.withOpacity(0.15)),
             ),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
+                Text(
                   "JUMU'AH",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: theme.text,
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
                     letterSpacing: 3,
                   ),
                 ),
                 const SizedBox(width: 20),
-                _subscriptTime(SharedData.instance.jummah, 28, FontWeight.w600),
+                _subscriptTime(SharedData.instance.jummah, 28, FontWeight.w600, theme, isAccent: true),
               ],
             ),
           ),
@@ -178,8 +178,28 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     );
   }
 
-  Widget _prayerRow(Map<String, String> p) {
-    return Center(
+  Widget _prayerRow(
+    Map<String, String> p,
+    ThemeConfig theme, {
+    bool isCurrent = false,
+    bool isNext = false,
+  }) {
+    // Background highlight only — no border, no badge
+    final rowBg  = isCurrent
+        ? theme.accent.withOpacity(0.14)
+        : isNext
+            ? theme.accent.withOpacity(0.06)
+            : Colors.transparent;
+    final nameFg = isCurrent ? theme.accentBright : theme.text;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 400),
+      decoration: BoxDecoration(
+        color: rowBg,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 1),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(
         children: [
           Expanded(
@@ -187,22 +207,24 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
             child: Text(
               p['name']!,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: nameFg,
                 fontWeight: FontWeight.bold,
                 fontSize: 22,
                 letterSpacing: 1.5,
               ),
             ),
           ),
-          Expanded(flex: 3, child: _timeCell(p['adhan']!)),
-          Expanded(flex: 3, child: _timeCell(p['iqamah']!)),
+          Expanded(flex: 3, child: _timeCell(p['adhan']!, theme)),
+          Expanded(flex: 3, child: _timeCell(p['iqamah']!, theme, isAccent: true)),
         ],
       ),
     );
   }
 
-  Widget _timeCell(String time) {
+  Widget _timeCell(String time, ThemeConfig theme, {bool isAccent = false, bool dimmed = false}) {
     final sp = time.split(' ');
+    final primaryColor = isAccent ? theme.accentBright : theme.text;
+    final secColor     = isAccent ? theme.accent : theme.textMuted;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -210,30 +232,30 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
       children: [
         Text(
           sp[0],
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: primaryColor,
             fontSize: 40,
             fontWeight: FontWeight.w600,
+            shadows: isAccent && !dimmed && theme.glowIntensity > 1.0 ? [
+              Shadow(color: theme.accent, blurRadius: 10 * theme.glowIntensity)
+            ] : null,
           ),
         ),
         const SizedBox(width: 2),
         Text(
           sp.length > 1 ? sp[1] : '',
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.65),
-            fontSize: 13,
-          ),
+          style: TextStyle(color: secColor, fontSize: 13),
         ),
       ],
     );
   }
 
-  Widget _buildRightPanel() {
+  Widget _buildRightPanel(ThemeConfig theme) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: theme.text.withOpacity(0.04),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
+        border: Border.all(color: theme.text.withOpacity(0.08)),
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -244,8 +266,10 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               Container(
                 width: 80,
                 height: 80,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  color: theme.bg,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: theme.accent.withOpacity(0.5), width: 2),
                 ),
                 child: Image.asset('assets/images/qr_code.jpeg', fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.qr_code_2, size: 50, color: Colors.black54))),
@@ -257,11 +281,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   border: Border.all(color: Colors.white38),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text(
+                child: Text(
                   'Islamic Society of Denton',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: theme.accentBright,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -271,7 +295,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               Text(
                 _formatDate(_now),
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
+                  color: theme.textMuted,
                   fontSize: 12,
                 ),
               ),
@@ -279,19 +303,19 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                 Text(
                   SharedData.instance.hijriDate,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.4),
+                    color: theme.textMuted.withOpacity(0.8),
                     fontSize: 11,
                   ),
                 ),
             ],
           ),
           const SizedBox(height: 16),
-          _liveClock(),
+          _liveClock(theme),
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
+              color: theme.accent.withOpacity(0.06),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
@@ -299,7 +323,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                 Text(
                   'NEXT IQAMAH IN',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.55),
+                    color: theme.textMuted,
                     fontSize: 14,
                     letterSpacing: 2,
                     fontWeight: FontWeight.w700,
@@ -308,8 +332,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                 const SizedBox(height: 4),
                 Text(
                   SharedData.instance.getCountdown(),
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: theme.accentBright,
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                   ),
@@ -321,21 +345,21 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _sunInfo('SUNRISE', SharedData.instance.sunrise),
-              _sunInfo('SUNSET', SharedData.instance.sunset),
+              _sunInfo('SUNRISE', SharedData.instance.sunrise, theme),
+              _sunInfo('SUNSET', SharedData.instance.sunset, theme),
             ],
           ),
           const SizedBox(height: 12),
           GestureDetector(
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
-            child: Icon(Icons.mosque, size: 28, color: Colors.white.withOpacity(0.3)),
+            child: Icon(Icons.mosque, size: 28, color: theme.marker.withOpacity(0.5)),
           ),
         ],
       ),
     );
   }
 
-  Widget _liveClock() {
+  Widget _liveClock(ThemeConfig theme) {
     final timeStr = _formatTime(_now);
     final sp = timeStr.split(' ');
     return Row(
@@ -344,8 +368,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
       children: [
         Text(
           sp[0],
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: theme.text,
             fontSize: 54,
             fontWeight: FontWeight.w700,
             letterSpacing: -1,
@@ -355,8 +379,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           padding: const EdgeInsets.only(bottom: 8, left: 4),
           child: Text(
             sp.length > 1 ? sp[1] : '',
-            style: const TextStyle(
-              color: Colors.white70,
+            style: TextStyle(
+              color: theme.textMuted,
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
@@ -366,35 +390,37 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     );
   }
 
-  Widget _sunInfo(String label, String time) {
+  Widget _sunInfo(String label, String time, ThemeConfig theme) {
     return Column(
       children: [
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.5),
+            color: theme.textMuted,
             fontSize: 12,
             letterSpacing: 1.5,
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 2),
-        _subscriptTime(time, 22, FontWeight.w600),
+        _subscriptTime(time, 22, FontWeight.w600, theme),
       ],
     );
   }
 
-  Widget _subscriptTime(String time, double fontSize, FontWeight weight) {
+  Widget _subscriptTime(String time, double fontSize, FontWeight weight, ThemeConfig theme, {bool isAccent = false}) {
+    final cMain = isAccent ? theme.accentBright : theme.text;
+    final cSub = isAccent ? theme.accent : theme.textMuted;
     final sp = time.split(' ');
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(sp[0], style: TextStyle(color: Colors.white, fontSize: fontSize, fontWeight: weight)),
+        Text(sp[0], style: TextStyle(color: cMain, fontSize: fontSize, fontWeight: weight)),
         if (sp.length > 1)
           Padding(
-            padding: EdgeInsets.only(bottom: 1, left: 2),
-            child: Text(sp[1], style: TextStyle(color: Colors.white70, fontSize: fontSize * 0.55, fontWeight: FontWeight.w500)),
+            padding: const EdgeInsets.only(bottom: 1, left: 2),
+            child: Text(sp[1], style: TextStyle(color: cSub, fontSize: fontSize * 0.55, fontWeight: FontWeight.w500)),
           ),
       ],
     );

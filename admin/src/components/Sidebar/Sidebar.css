@@ -100,3 +100,35 @@
 }
 .sidebar.collapsed .sidebar-bottom button { justify-content: center; padding: 10px; }
 .sidebar-bottom button:hover { color: #fff; background: var(--sidebar-accent); }
+
+/* ── Mobile overlay backdrop ─────────────────────────── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 25;
+  backdrop-filter: blur(2px);
+}
+
+@media (max-width: 768px) {
+  /* Hide sidebar off-screen by default on mobile */
+  .sidebar {
+    transform: translateX(-100%);
+    width: var(--sidebar-width) !important;
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    z-index: 30;
+  }
+  /* Slide in when mobile-open */
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  .sidebar-overlay {
+    display: block;
+  }
+  /* Hide the desktop collapse toggle on mobile */
+  .sidebar-toggle {
+    display: none;
+  }
+}
+

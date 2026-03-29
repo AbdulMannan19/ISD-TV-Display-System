@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../services/shared_data.dart';
+import '../services/theme_service.dart';
+import '../theme/theme_config.dart';
 import 'settings_screen.dart';
 
 class ContentScreen extends StatefulWidget {
@@ -75,53 +77,51 @@ class _ContentScreenState extends State<ContentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ThemeService().current;
+    
     if (isLoading) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF000428),
-        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+      return Scaffold(
+        backgroundColor: theme.bg,
+        body: Center(child: CircularProgressIndicator(color: theme.accent)),
       );
     }
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF000428), Color(0xFF004E92), Color(0xFF001F54)],
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              children: [
-                Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(flex: 7, child: widget.customContent != null
-                          ? widget.customContent!(context)
-                          : _buildDefaultContent()),
-                      const SizedBox(width: 20),
-                      Expanded(flex: 3, child: _buildInfoPanel()),
-                    ],
-                  ),
+      backgroundColor: theme.bg,
+      body: ThemeService().buildBackground(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(flex: 7, child: widget.customContent != null
+                        ? widget.customContent!(context)
+                        : _buildDefaultContent(theme)),
+                    const SizedBox(width: 20),
+                    Expanded(flex: 3, child: _buildInfoPanel(theme)),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                _buildPrayerBar(),
-              ],
-            ),
+              ),
+              const SizedBox(height: 12),
+              _buildPrayerBar(theme),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildDefaultContent() {
+  Widget _buildDefaultContent(ThemeConfig theme) {
+    // Content cards always keep their original parchment + golden styling
+    // regardless of the active theme — only the surrounding background changes.
+    final cardBg = widget.contentBgColor;       // default: 0xFFFAF6F0 cream
+    final cardText = widget.contentTextColor;    // default: 0xFF8B6914 golden
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFFAF6F0),
+        color: cardBg,
         borderRadius: BorderRadius.circular(20),
       ),
       padding: const EdgeInsets.all(15),
@@ -131,7 +131,7 @@ class _ContentScreenState extends State<ContentScreen> {
         children: [
           Text(widget.title,
             textAlign: TextAlign.center,
-            style: TextStyle(color: const Color(0xFF8B6914).withOpacity(0.7),
+            style: TextStyle(color: cardText.withOpacity(0.7),
               fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 3)),
           const SizedBox(height: 12),
           Expanded(
@@ -139,7 +139,7 @@ class _ContentScreenState extends State<ContentScreen> {
               child: SingleChildScrollView(
                 child: Text(content!['text']!,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: const Color(0xFF8B6914),
+                  style: TextStyle(color: cardText,
                     fontSize: _dynamicFontSize(content!['text']!.length), fontWeight: FontWeight.w400, height: 1.6, letterSpacing: 0.3)),
               ),
             ),
@@ -148,11 +148,11 @@ class _ContentScreenState extends State<ContentScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFF8B6914).withOpacity(0.12),
+              color: cardText.withOpacity(0.12),
               borderRadius: BorderRadius.circular(8)),
             child: Text(content!['source']!,
               textAlign: TextAlign.center,
-              style: TextStyle(color: const Color(0xFF8B6914).withOpacity(0.8),
+              style: TextStyle(color: cardText.withOpacity(0.8),
                 fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
           ),
         ],
@@ -160,13 +160,13 @@ class _ContentScreenState extends State<ContentScreen> {
     );
   }
 
-  Widget _buildInfoPanel() {
+  Widget _buildInfoPanel(ThemeConfig theme) {
     final shared = SharedData.instance;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: theme.text.withOpacity(0.04),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
+        border: Border.all(color: theme.text.withOpacity(0.08)),
       ),
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -174,35 +174,35 @@ class _ContentScreenState extends State<ContentScreen> {
           Column(children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(border: Border.all(color: Colors.white38), borderRadius: BorderRadius.circular(8)),
-              child: const Text('Islamic Society of Denton', textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+              decoration: BoxDecoration(border: Border.all(color: theme.text.withOpacity(0.2)), borderRadius: BorderRadius.circular(8)),
+              child: Text('Islamic Society of Denton', textAlign: TextAlign.center,
+                style: TextStyle(color: theme.accentBright, fontSize: 13, fontWeight: FontWeight.w600)),
             ),
             const SizedBox(height: 6),
             Text(_formatDate(_now), textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13, letterSpacing: 0.5)),
+              style: TextStyle(color: theme.textMuted, fontSize: 13, letterSpacing: 0.5)),
             if (shared.hijriDate.isNotEmpty)
               Text(shared.hijriDate, textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12, letterSpacing: 0.5)),
+                style: TextStyle(color: theme.textMuted.withOpacity(0.8), fontSize: 12, letterSpacing: 0.5)),
           ]),
           const Spacer(),
-          _buildClock(),
+          _buildClock(theme),
           const SizedBox(height: 10),
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            _sunInfo('SUNRISE', shared.sunrise),
-            _sunInfo('SUNSET', shared.sunset),
+            _sunInfo('SUNRISE', shared.sunrise, theme),
+            _sunInfo('SUNSET', shared.sunset, theme),
           ]),
           const SizedBox(height: 10),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(color: theme.accent.withOpacity(0.06), borderRadius: BorderRadius.circular(10)),
             child: Column(children: [
               Text('NEXT IQAMAH IN',
-                style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 2)),
+                style: TextStyle(color: theme.textMuted, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 2)),
               const SizedBox(height: 4),
               Text(shared.getCountdown(),
-                style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                style: TextStyle(color: theme.accentBright, fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: 1)),
             ]),
           ),
         ],
@@ -210,7 +210,7 @@ class _ContentScreenState extends State<ContentScreen> {
     );
   }
 
-  Widget _buildClock() {
+  Widget _buildClock(ThemeConfig theme) {
     final timeStr = _formatTime(_now);
     final sp = timeStr.split(' ');
     return Row(
@@ -218,98 +218,132 @@ class _ContentScreenState extends State<ContentScreen> {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Text(sp[0],
-          style: const TextStyle(color: Colors.white, fontSize: 54, fontWeight: FontWeight.w700, letterSpacing: -1)),
+          style: TextStyle(color: theme.text, fontSize: 54, fontWeight: FontWeight.w700, letterSpacing: -1)),
         Padding(
           padding: const EdgeInsets.only(bottom: 6, left: 4),
           child: Text(sp.length > 1 ? sp[1] : '',
-            style: const TextStyle(color: Colors.white70, fontSize: 18, fontWeight: FontWeight.w500)),
+            style: TextStyle(color: theme.textMuted, fontSize: 18, fontWeight: FontWeight.w500)),
         ),
       ],
     );
   }
 
-  Widget _buildPrayerBar() {
+  Widget _buildPrayerBar(ThemeConfig theme) {
     final shared = SharedData.instance;
     if (shared.prayers.isEmpty) return const SizedBox();
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: theme.text.withOpacity(0.04),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.15)),
+        border: Border.all(color: theme.text.withOpacity(0.08)),
       ),
       child: Row(
         children: [
-          _prayerBarHeader(),
+          _prayerBarHeader(theme),
           const SizedBox(width: 16),
-          ...shared.prayers.map((p) => Expanded(child: _prayerBarItem(p))),
+          ...shared.prayers.asMap().entries.map((e) {
+            final idx       = e.key;
+            final isCurrent = idx == shared.getCurrentPrayerIndex();
+            final isNext    = idx == shared.getNextPrayerIndex();
+            return Expanded(child: _prayerBarItem(e.value, theme, isCurrent: isCurrent, isNext: isNext));
+          }),
           if (shared.jummah.isNotEmpty) ...[
-            Container(width: 1, height: 44, color: Colors.white24, margin: const EdgeInsets.symmetric(horizontal: 10)),
-            _jumuahBarItem(shared.jummah),
+            Container(width: 1, height: 44, color: theme.textMuted.withOpacity(0.3), margin: const EdgeInsets.symmetric(horizontal: 10)),
+            _jumuahBarItem(shared.jummah, theme),
           ],
           const SizedBox(width: 12),
           GestureDetector(
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
-            child: Icon(Icons.mosque, size: 24, color: Colors.white.withOpacity(0.3)),
+            child: Icon(Icons.mosque, size: 24, color: theme.marker.withOpacity(0.5)),
           ),
         ],
       ),
     );
   }
 
-  Widget _prayerBarHeader() {
+  Widget _prayerBarHeader(ThemeConfig theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         const SizedBox(height: 20),
-        Text('STARTS', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 1)),
+        Text('STARTS', style: TextStyle(color: theme.textMuted, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 1)),
         const SizedBox(height: 4),
-        Text('IQAMAH', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 1)),
+        Text('IQAMAH', style: TextStyle(color: theme.textMuted, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 1)),
       ],
     );
   }
 
-  Widget _prayerBarItem(Map<String, String> p) {
+  Widget _prayerBarItem(
+    Map<String, String> p,
+    ThemeConfig theme, {
+    bool isCurrent = false,
+    bool isNext    = false,
+  }) {
+    final nameFg = isCurrent ? theme.accentBright : theme.text;
+    final rowBg  = isCurrent
+        ? theme.accent.withOpacity(0.14)
+        : isNext
+            ? theme.accent.withOpacity(0.06)
+            : Colors.transparent;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 400),
+      margin: const EdgeInsets.symmetric(horizontal: 2),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+      decoration: BoxDecoration(
+        color: rowBg,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          Text(p['name']!,
+            style: TextStyle(
+              color: nameFg,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1,
+            )),
+          const SizedBox(height: 4),
+          _subscriptTime(p['adhan']!,  22, FontWeight.w700, theme),
+          const SizedBox(height: 2),
+          _subscriptTime(p['iqamah']!, 22, FontWeight.w700, theme, isAccent: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _jumuahBarItem(String time, ThemeConfig theme) {
     return Column(
       children: [
-        Text(p['name']!, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: 1)),
+        Text("JUMU'AH", style: TextStyle(color: theme.text, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 1)),
         const SizedBox(height: 4),
-        _subscriptTime(p['adhan']!, 22, FontWeight.w700),
-        const SizedBox(height: 2),
-        _subscriptTime(p['iqamah']!, 22, FontWeight.w700),
+        _subscriptTime(time, 22, FontWeight.w700, theme, isAccent: true),
       ],
     );
   }
 
-  Widget _jumuahBarItem(String time) {
-    return Column(
-      children: [
-        const Text("JUMU'AH", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 1)),
-        const SizedBox(height: 4),
-        _subscriptTime(time, 22, FontWeight.w700),
-      ],
-    );
-  }
-
-  Widget _sunInfo(String label, String time) {
+  Widget _sunInfo(String label, String time, ThemeConfig theme) {
     return Column(children: [
-      Text(label, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12, letterSpacing: 1.5, fontWeight: FontWeight.w600)),
+      Text(label, style: TextStyle(color: theme.textMuted, fontSize: 12, letterSpacing: 1.5, fontWeight: FontWeight.w600)),
       const SizedBox(height: 2),
-      _subscriptTime(time, 22, FontWeight.w600),
+      _subscriptTime(time, 22, FontWeight.w600, theme),
     ]);
   }
 
-  Widget _subscriptTime(String time, double fontSize, FontWeight weight, {double opacity = 1.0}) {
+  Widget _subscriptTime(String time, double fontSize, FontWeight weight, ThemeConfig theme, {bool isAccent = false}) {
+    final cMain = isAccent ? theme.accentBright : theme.text;
+    final cSub = isAccent ? theme.accent : theme.textMuted;
     final sp = time.split(' ');
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(sp[0], style: TextStyle(color: Colors.white.withOpacity(opacity), fontSize: fontSize, fontWeight: weight)),
+        Text(sp[0], style: TextStyle(color: cMain, fontSize: fontSize, fontWeight: weight)),
         if (sp.length > 1)
           Padding(
             padding: const EdgeInsets.only(bottom: 1, left: 2),
-            child: Text(sp[1], style: TextStyle(color: Colors.white70.withOpacity(opacity), fontSize: fontSize * 0.55, fontWeight: FontWeight.w500)),
+            child: Text(sp[1], style: TextStyle(color: cSub, fontSize: fontSize * 0.55, fontWeight: FontWeight.w500)),
           ),
       ],
     );

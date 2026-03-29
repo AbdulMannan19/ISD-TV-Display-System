@@ -16,26 +16,79 @@ import 'services/shared_data.dart';
 import 'services/display_mode_service.dart';
 import 'services/alert_service.dart';
 import 'services/iqamah_schedule_service.dart';
+import 'services/theme_service.dart';
 import 'test/test_controls.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+
+/// Permanent self-healing logic to prevent startup crashes due to corrupted storage.
+Future<void> _performStorageHealthCheck() async {
+  try {
+    final searchDirs = [
+      await getApplicationSupportDirectory(), // Target: Roaming/com.isd/display
+    ];
+
+    for (var dir in searchDirs) {
+      final directory = Directory(dir.path);
+      if (!await directory.exists()) continue;
+
+      await for (var entity in directory.list(recursive: true, followLinks: false)) {
+        if (entity is File) {
+          try {
+            final len = await entity.length();
+            if (len > 0 && len < 1024 * 512) { // Under 512KB
+              final bytes = await entity.readAsBytes();
+              if (bytes.every((b) => b == 0)) {
+                debugPrint("--- STORAGE REPAIR ---");
+                debugPrint("Self-healing: Found and deleted null-corrupted file: ${entity.path}");
+                await entity.delete();
+                debugPrint("----------------------");
+              }
+            }
+          } catch (_) {
+            // Silently ignore files that are locked by other processes
+          }
+        }
+      }
+    }
+  } catch (e) {
+    // Top-level catch just to be safe
+  }
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
-  await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL']!,
-    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
-  );
+  
+  // Run self-healing check before any other services start
+  await _performStorageHealthCheck();
+  
+  try {
+    await dotenv.load(fileName: ".env");
+    
+    await Supabase.initialize(
+      url: dotenv.env['SUPABASE_URL']?.trim() ?? '',
+      anonKey: dotenv.env['SUPABASE_ANON_KEY']?.trim() ?? '',
+    );
 
-  await SharedData.instance.init();
-  await SharedData.instance.fetchDailyContent();
+    // Initialize core services
+    await SharedData.instance.init();
+    await SharedData.instance.fetchDailyContent();
+    await ThemeService().init();
+  } catch (e) {
+    debugPrint("Initialization error: $e");
+  }
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
+  
+  try {
+    // Apply any scheduled Iqamah changes before app starts
+    await IqamahScheduleService.applyScheduledChanges();
+  } catch (_) {}
 
-  await IqamahScheduleService.applyScheduledChanges();
   runApp(const DisplayApp());
 }
 
@@ -44,11 +97,19 @@ class DisplayApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ISD Display',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true, fontFamily: 'Roboto'),
-      home: const ScreenRotator(),
+    return AnimatedBuilder(
+      animation: ThemeService(),
+      builder: (context, _) {
+        return MaterialApp(
+          title: 'ISD Display',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            useMaterial3: true, 
+            fontFamily: 'Roboto',
+          ),
+          home: const ScreenRotator(),
+        );
+      },
     );
   }
 }

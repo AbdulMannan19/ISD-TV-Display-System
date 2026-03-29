@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:apk_sideload/install_apk.dart';
+import '../services/theme_service.dart';
+import '../theme/theme_config.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -116,15 +118,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ThemeService().current;
+    
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF000428), Color(0xFF004E92), Color(0xFF001F54)],
-          ),
-        ),
+      backgroundColor: theme.bg,
+      body: ThemeService().buildBackground(
         child: SafeArea(
           child: Column(
             children: [
@@ -134,11 +132,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      icon: Icon(Icons.arrow_back, color: theme.text),
                     ),
                     const SizedBox(width: 8),
-                    const Text('Settings',
-                      style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w600)),
+                    Text('Settings',
+                      style: TextStyle(color: theme.text, fontSize: 24, fontWeight: FontWeight.w600)),
                   ],
                 ),
               ),
@@ -148,22 +146,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     width: 500,
                     padding: const EdgeInsets.all(32),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.07),
+                      color: theme.text.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.12)),
+                      border: Border.all(color: theme.text.withOpacity(0.12)),
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.mosque, size: 48, color: Colors.white.withOpacity(0.4)),
+                        Icon(Icons.mosque, size: 48, color: theme.marker.withOpacity(0.6)),
                         const SizedBox(height: 16),
-                        const Text('ISD Prayer Times',
-                          style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w600)),
+                        Text('ISD Prayer Times',
+                          style: TextStyle(color: theme.text, fontSize: 20, fontWeight: FontWeight.w600)),
                         const SizedBox(height: 4),
                         Text('Installed: $_currentVersion',
-                          style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14)),
+                          style: TextStyle(color: theme.textMuted, fontSize: 14)),
                         const SizedBox(height: 32),
-                        _buildUpdateSection(),
+                        _buildUpdateSection(theme),
                       ],
                     ),
                   ),
@@ -176,13 +174,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildUpdateSection() {
+  Widget _buildUpdateSection(ThemeConfig theme) {
     if (_checking) {
       return Column(
         children: [
-          const SizedBox(height: 8, width: 8, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),
+          SizedBox(height: 8, width: 8, child: CircularProgressIndicator(color: theme.accentBright, strokeWidth: 2)),
           const SizedBox(height: 12),
-          Text('Checking for updates...', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14)),
+          Text('Checking for updates...', style: TextStyle(color: theme.textMuted, fontSize: 14)),
         ],
       );
     }
@@ -192,10 +190,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           SizedBox(
             width: 200,
-            child: LinearProgressIndicator(value: _progress > 0 ? _progress : null, color: Colors.greenAccent, backgroundColor: Colors.white12),
+            child: LinearProgressIndicator(value: _progress > 0 ? _progress : null, color: theme.accentBright, backgroundColor: theme.text.withOpacity(0.1)),
           ),
           const SizedBox(height: 12),
-          Text('Downloading update...', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14)),
+          Text('Downloading update...', style: TextStyle(color: theme.textMuted, fontSize: 14)),
         ],
       );
     }
@@ -203,13 +201,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (_status == 'up_to_date') {
       return Column(
         children: [
-          const Icon(Icons.check_circle, color: Colors.greenAccent, size: 40),
+          Icon(Icons.check_circle, color: theme.accent, size: 40),
           const SizedBox(height: 12),
-          const Text('You\'re up to date', style: TextStyle(color: Colors.greenAccent, fontSize: 16, fontWeight: FontWeight.w600)),
+          Text('You\'re up to date', style: TextStyle(color: theme.accent, fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 4),
-          Text('Version $_latestVersion', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13)),
+          Text('Version $_latestVersion', style: TextStyle(color: theme.textMuted, fontSize: 13)),
           const SizedBox(height: 20),
-          _checkButton(),
+          _checkButton(theme),
         ],
       );
     }
@@ -228,15 +226,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               icon: const Icon(Icons.download),
               label: const Text('Download & Install'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.greenAccent.shade700,
-                foregroundColor: Colors.white,
+                backgroundColor: theme.accent,
+                foregroundColor: theme.bg,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
             )
           else
             Text('Updates are only available on Android',
-              style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13)),
+              style: TextStyle(color: theme.textMuted, fontSize: 13)),
         ],
       );
     }
@@ -249,25 +247,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Text(_status, textAlign: TextAlign.center,
             style: TextStyle(color: Colors.redAccent.shade100, fontSize: 14)),
           const SizedBox(height: 20),
-          _checkButton(),
+          _checkButton(theme),
         ],
       );
     }
 
-    return _checkButton();
+    return _checkButton(theme);
   }
 
-  Widget _checkButton() {
+  Widget _checkButton(ThemeConfig theme) {
     return ElevatedButton.icon(
       onPressed: _checkForUpdate,
       icon: const Icon(Icons.refresh),
       label: const Text('Check for Updates'),
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white.withOpacity(0.12),
-        foregroundColor: Colors.white,
+        backgroundColor: theme.text.withOpacity(0.1),
+        foregroundColor: theme.text,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        side: BorderSide(color: Colors.white.withOpacity(0.2)),
+        side: BorderSide(color: theme.text.withOpacity(0.2)),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/theme_service.dart';
 
 class SlidesScreen extends StatelessWidget {
   final Map<String, dynamic> slide;
@@ -8,6 +9,7 @@ class SlidesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = slide['image_url'] as String;
+    final theme = ThemeService().current;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -19,26 +21,19 @@ class SlidesScreen extends StatelessWidget {
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return Container(
-            color: const Color(0xFF0A2A5E),
-            child: const Center(
-              child: CircularProgressIndicator(color: Colors.white),
+            color: theme.bg,
+            child: Center(
+              child: CircularProgressIndicator(color: theme.accent),
             ),
           );
         },
         errorBuilder: (context, error, stackTrace) {
-          return Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF0D3B8C), Color(0xFF051840), Color(0xFF0A2A5E)],
-              ),
-            ),
-            child: const Center(
+          return ThemeService().buildBackground(
+            child: Center(
               child: Icon(
                 Icons.broken_image,
                 size: 64,
-                color: Colors.white54,
+                color: theme.textMuted.withOpacity(0.5),
               ),
             ),
           );

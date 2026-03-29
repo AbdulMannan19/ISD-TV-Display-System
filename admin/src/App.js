@@ -13,6 +13,7 @@ import Hadiths from './pages/Content/Hadiths';
 import Duas from './pages/Content/Duas';
 import Verses from './pages/Content/Verses';
 import Support from './pages/Support/Support';
+import Settings from './pages/Settings/Settings';
 import EmbedPrayerTimes from './pages/Embed/EmbedPrayerTimes';
 import './App.css';
 
@@ -20,6 +21,7 @@ function AppContent() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   useEffect(() => {
@@ -48,8 +50,17 @@ function AppContent() {
 
   return (
     <div className="app">
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
-      <Topbar collapsed={collapsed} email={email} />
+      <Sidebar
+        collapsed={collapsed}
+        onToggle={() => setCollapsed(!collapsed)}
+        mobileOpen={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+      />
+      <Topbar
+        collapsed={collapsed}
+        email={email}
+        onMenuToggle={() => setMobileOpen(o => !o)}
+      />
       <main className={`main${collapsed ? ' collapsed' : ''}`}>
         <Routes>
           <Route path="/slides" element={<Slides />} />
@@ -59,6 +70,7 @@ function AppContent() {
           <Route path="/duas" element={<Duas />} />
           <Route path="/verses" element={<Verses />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/support" element={<Support />} />
           <Route path="*" element={<Navigate to="/prayer-times" />} />
         </Routes>

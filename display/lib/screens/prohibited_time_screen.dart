@@ -45,10 +45,12 @@ class _ProhibitedTimeScreenState extends State<ProhibitedTimeScreen> {
   }
 
   Widget _buildProhibitedContent() {
-    const accent = Color(0xFFC62828);
+    const accent = Color(0xFFC62828);   // fixed crimson red
+    const cardBg  = Color(0xFFFFF1F1); // light rose — same style as Dua
+    
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
+        color: cardBg,
         borderRadius: BorderRadius.circular(20),
       ),
       padding: const EdgeInsets.all(36),
@@ -80,7 +82,8 @@ class _ProhibitedTimeScreenState extends State<ProhibitedTimeScreen> {
                       child: Text(
                         '"There were three times at which Allah\'s Messenger used to forbid us to pray or bury our dead: when the sun begins to rise till it is fully up, when the sun is at its height at midday till it passes over the meridian, and when the sun draws near to setting till it sets."',
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.black,
+                        style: const TextStyle(
+                          color: Colors.black87,  // always dark on white card
                           fontSize: 15, fontStyle: FontStyle.italic, height: 1.6)),
                     ),
                     Padding(

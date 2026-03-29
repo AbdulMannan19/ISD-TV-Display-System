@@ -119,6 +119,40 @@ class SharedData {
     return '$totalMin MIN';
   }
 
+  /// Index of the prayer whose adhan window we are currently in.
+  /// Returns -1 if none determined yet.
+  int getCurrentPrayerIndex() {
+    if (prayers.isEmpty) return -1;
+    final now = DateTime.now();
+    final adhans = prayers.map((p) => _parseTime(p['adhan']!, now)).toList();
+    int current = -1;
+    for (int i = 0; i < adhans.length; i++) {
+      if (adhans[i] != null && !now.isBefore(adhans[i]!)) {
+        current = i;
+      }
+    }
+    return current;
+  }
+
+  /// Index of the prayer whose iqamah is the next upcoming one.
+  /// Returns -1 if none found.
+  int getNextPrayerIndex() {
+    if (prayers.isEmpty || _iqamahDateTimes.isEmpty) return -1;
+    final now = DateTime.now();
+    DateTime? target;
+    for (final dt in _iqamahDateTimes) {
+      if (dt.isAfter(now)) { target = dt; break; }
+    }
+    if (target == null) return -1;
+    for (int i = 0; i < prayers.length; i++) {
+      final dt = _parseTime(prayers[i]['iqamah']!, now);
+      if (dt != null && dt.hour == target.hour && dt.minute == target.minute) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
   String _to12(String time) {
     if (time.contains('AM') || time.contains('PM')) return time;
     final parts = time.split(':');

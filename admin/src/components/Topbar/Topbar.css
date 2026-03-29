@@ -31,3 +31,28 @@
   transition: opacity 0.15s;
 }
 .topbar-avatar:hover { opacity: 0.8; }
+
+/* Hamburger — hidden on desktop, shown on mobile */
+.topbar-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 32px; height: 32px;
+  background: none; border: none; cursor: pointer;
+  padding: 4px; border-radius: 6px;
+  transition: background 0.15s;
+}
+.topbar-hamburger:hover { background: var(--green-bg); }
+.topbar-hamburger span {
+  display: block; width: 18px; height: 2px;
+  background: var(--text); border-radius: 2px;
+  transition: all 0.2s;
+}
+
+@media (max-width: 768px) {
+  .topbar { left: 0 !important; padding: 0 16px; }
+  .topbar-hamburger { display: flex; }
+  .status-text { display: none; }
+}

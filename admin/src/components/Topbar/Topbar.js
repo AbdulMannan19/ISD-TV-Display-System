@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom';
 import './Topbar.css';
 
-export default function Topbar({ collapsed, email }) {
+export default function Topbar({ collapsed, email, onMenuToggle }) {
   const initial = email ? email[0].toUpperCase() : '?';
 
   return (
     <div className={`topbar${collapsed ? ' collapsed' : ''}`}>
       <div className="topbar-left">
+        <button className="topbar-hamburger" onClick={onMenuToggle} aria-label="Toggle menu">
+          <span /><span /><span />
+        </button>
         <span className="status-dot" />
         <span className="status-text">Display Active</span>
       </div>

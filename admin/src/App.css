@@ -130,3 +130,21 @@ body {
 }
 .modal-close:hover { color: var(--text); background: #f3f4f6; }
 
+/* ── Responsive ─────────────────────────────────────── */
+@media (max-width: 768px) {
+  .main {
+    margin-left: 0 !important;
+    padding: 20px 16px;
+  }
+  .page-header {
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .page-title { font-size: 1.4rem; }
+}
+
+@media (max-width: 480px) {
+  .main { padding: 16px 12px; }
+  .page-title { font-size: 1.2rem; }
+}
