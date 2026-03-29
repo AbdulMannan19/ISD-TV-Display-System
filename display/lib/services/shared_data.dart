@@ -20,15 +20,29 @@ class SharedData {
   Map<String, String> currentDua = {'text': '', 'source': ''};
   Map<String, String> currentVerse = {'text': '', 'source': ''};
 
+  bool _isFetching = false;
+
   Future<void> init() async {
-    await _fetchFromApi();
-    await _loadIqamahFromDb();
-    _computeNextTarget();
+    if (_isFetching) return;
+    _isFetching = true;
+    try {
+      await _fetchFromApi();
+      await _loadIqamahFromDb();
+      _computeNextTarget();
+    } finally {
+      _isFetching = false;
+    }
   }
 
   Future<void> refreshIqamah() async {
-    await _loadIqamahFromDb();
-    _computeNextTarget();
+    if (_isFetching) return;
+    _isFetching = true;
+    try {
+      await _loadIqamahFromDb();
+      _computeNextTarget();
+    } finally {
+      _isFetching = false;
+    }
   }
 
   Future<void> fetchDailyContent() async {
@@ -140,7 +154,7 @@ class SharedData {
   }
 
   /// Index of the prayer whose iqamah is the next upcoming one.
-  /// Returns -1 if none found.
+  /// Returns -1 if none found, -2 if Jumu'ah.
   int getNextPrayerIndex() {
     if (prayers.isEmpty || _iqamahDateTimes.isEmpty) return -1;
     final now = DateTime.now();
@@ -154,6 +168,14 @@ class SharedData {
 
     // If no iqamah is after now today, the next one is Fajr (index 0).
     if (target == null) return 0;
+
+    // Check if target matches Jumu'ah time on Fridays
+    if (now.weekday == DateTime.friday && jummah.isNotEmpty) {
+      final jDt = _parseTime(jummah, now);
+      if (jDt != null && jDt.hour == target.hour && jDt.minute == target.minute) {
+        return -2; // Special index for Jumu'ah
+      }
+    }
 
     // Find the index of the prayer matching this iqamah time.
     for (int i = 0; i < prayers.length; i++) {

@@ -149,29 +149,54 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
             return Expanded(child: _prayerRow(e.value, theme, isCurrent: isCurrent, isNext: isNext));
           }),
           const SizedBox(height: 12),
-          Container(
-            decoration: BoxDecoration(
-              color: theme.accent.withOpacity(0.06),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: theme.accent.withOpacity(0.15)),
+          _buildJumuahBox(theme),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildJumuahBox(ThemeConfig theme) {
+    final nextIdx = SharedData.instance.getNextPrayerIndex();
+    final isNext = nextIdx == -2;
+    
+    return Container(
+      decoration: BoxDecoration(
+        color: isNext 
+            ? theme.accent.withOpacity(0.18) 
+            : theme.accent.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isNext ? theme.accentBright : theme.accent.withOpacity(0.15)
+        ),
+        boxShadow: isNext ? [
+          BoxShadow(
+            color: theme.accent.withOpacity(0.25),
+            blurRadius: 15,
+            spreadRadius: 2,
+          )
+        ] : null,
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            "JUMU'AH",
+            style: TextStyle(
+              color: isNext ? theme.accentBright : theme.text,
+              fontWeight: isNext ? FontWeight.w900 : FontWeight.bold,
+              fontSize: 15,
+              letterSpacing: 3,
             ),
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "JUMU'AH",
-                  style: TextStyle(
-                    color: theme.text,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                    letterSpacing: 3,
-                  ),
-                ),
-                const SizedBox(width: 20),
-                _subscriptTime(SharedData.instance.jummah, 28, FontWeight.w600, theme, isAccent: true),
-              ],
-            ),
+          ),
+          const SizedBox(width: 20),
+          _subscriptTime(
+            SharedData.instance.jummah, 
+            28, 
+            isNext ? FontWeight.w900 : FontWeight.w600, 
+            theme, 
+            isAccent: true,
+            isNext: isNext,
           ),
         ],
       ),
@@ -424,8 +449,10 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     );
   }
 
-  Widget _subscriptTime(String time, double fontSize, FontWeight weight, ThemeConfig theme, {bool isAccent = false}) {
-    final cMain = isAccent ? theme.accentBright : theme.text;
+  Widget _subscriptTime(String time, double fontSize, FontWeight weight, ThemeConfig theme, {bool isAccent = false, bool isNext = false, bool isCurrent = false}) {
+    final cMain = isAccent 
+        ? (isNext ? theme.accentBright : (isCurrent ? theme.accent : theme.accentBright))
+        : (isNext ? theme.accent : (isCurrent ? theme.accent.withOpacity(0.8) : theme.text));
     final cSub = isAccent ? theme.accent : theme.textMuted;
     final sp = time.split(' ');
     return Row(

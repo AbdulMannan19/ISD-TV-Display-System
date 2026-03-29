@@ -328,12 +328,38 @@ class _ContentScreenState extends State<ContentScreen> {
   }
 
   Widget _jumuahBarItem(String time, ThemeConfig theme) {
-    return Column(
-      children: [
-        Text("JUMU'AH", style: TextStyle(color: theme.text, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 1)),
-        const SizedBox(height: 4),
-        _subscriptTime(time, 22, FontWeight.w700, theme, isAccent: true),
-      ],
+    final isNext = SharedData.instance.getNextPrayerIndex() == -2;
+    final rowDecor = isNext
+        ? BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: theme.accent.withOpacity(0.18),
+            boxShadow: [
+              BoxShadow(
+                color: theme.accent.withOpacity(0.2),
+                blurRadius: 10,
+                spreadRadius: 1,
+              )
+            ],
+          )
+        : null;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 400),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      decoration: rowDecor,
+      child: Column(
+        children: [
+          Text("JUMU'AH", 
+            style: TextStyle(
+              color: isNext ? theme.accentBright : theme.text, 
+              fontSize: 16, 
+              fontWeight: isNext ? FontWeight.w900 : FontWeight.w700, 
+              letterSpacing: 1
+            )),
+          const SizedBox(height: 4),
+          _subscriptTime(time, 22, isNext ? FontWeight.w900 : FontWeight.w700, theme, isAccent: true, isNext: isNext),
+        ],
+      ),
     );
   }
 
