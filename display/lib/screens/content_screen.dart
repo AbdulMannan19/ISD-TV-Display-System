@@ -191,6 +191,7 @@ class _ContentScreenState extends State<ContentScreen> {
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             _sunInfo('SUNRISE', shared.sunrise, theme),
             _sunInfo('SUNSET', shared.sunset, theme),
+            _sunInfo('LAST THIRD', shared.lastThird, theme),
           ]),
           const SizedBox(height: 10),
           Container(
@@ -198,7 +199,7 @@ class _ContentScreenState extends State<ContentScreen> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(color: theme.accent.withOpacity(0.06), borderRadius: BorderRadius.circular(10)),
             child: Column(children: [
-              Text('NEXT IQAMAH IN',
+              Text('${shared.getNextPrayerName()} IQAMA IN',
                 style: TextStyle(color: theme.textMuted, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 2)),
               const SizedBox(height: 4),
               Text(shared.getCountdown(),
@@ -280,48 +281,37 @@ class _ContentScreenState extends State<ContentScreen> {
     bool isCurrent = false,
     bool isNext    = false,
   }) {
-    final nameFg = isNext
-        ? theme.accentBright
-        : isCurrent
-            ? theme.accent
-            : theme.text;
-    final rowDecor = isNext
-        ? BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: theme.accent.withOpacity(0.18),
-            boxShadow: [
-              BoxShadow(
-                color: theme.accent.withOpacity(0.2),
-                blurRadius: 10,
-                spreadRadius: 1,
-              )
-            ],
-          )
-        : isCurrent
-            ? BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: theme.accent.withOpacity(0.15),
-              )
-            : null;
+    final nameFg = isNext 
+        ? theme.accentBright 
+        : (isCurrent ? theme.accent : theme.text);
+    final rowDecor = BoxDecoration(
+      color: isNext 
+          ? theme.accentBright.withOpacity(0.12) 
+          : (isCurrent ? theme.accent.withOpacity(0.08) : Colors.transparent),
+      borderRadius: BorderRadius.circular(8),
+    );
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 400),
-      margin: const EdgeInsets.symmetric(horizontal: 2),
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: rowDecor,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(p['name']!,
             style: TextStyle(
               color: nameFg,
               fontSize: 18,
-              fontWeight: isNext ? FontWeight.w900 : FontWeight.w700,
+              fontWeight: isNext ? FontWeight.w900 : (isCurrent ? FontWeight.w700 : FontWeight.w700),
               letterSpacing: 1,
+              shadows: isNext ? [
+                Shadow(color: theme.accentBright.withOpacity(0.6), blurRadius: 12)
+              ] : null,
             )),
-          const SizedBox(height: 4),
-          _subscriptTime(p['adhan']!,  22, FontWeight.w700, theme, isNext: isNext, isCurrent: isCurrent),
           const SizedBox(height: 2),
-          _subscriptTime(p['iqamah']!, 22, FontWeight.w700, theme, isAccent: true, isNext: isNext, isCurrent: isCurrent),
+          _subscriptTime(p['adhan']!,  20, FontWeight.w700, theme, isNext: isNext, isCurrent: isCurrent),
+          _subscriptTime(p['iqamah']!, 20, FontWeight.w700, theme, isAccent: true, isNext: isNext, isCurrent: isCurrent),
         ],
       ),
     );
@@ -329,35 +319,29 @@ class _ContentScreenState extends State<ContentScreen> {
 
   Widget _jumuahBarItem(String time, ThemeConfig theme) {
     final isNext = SharedData.instance.getNextPrayerIndex() == -2;
-    final rowDecor = isNext
-        ? BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: theme.accent.withOpacity(0.18),
-            boxShadow: [
-              BoxShadow(
-                color: theme.accent.withOpacity(0.2),
-                blurRadius: 10,
-                spreadRadius: 1,
-              )
-            ],
-          )
-        : null;
+    final rowDecor = BoxDecoration(
+      color: isNext ? theme.accentBright.withOpacity(0.12) : Colors.transparent,
+      borderRadius: BorderRadius.circular(8),
+    );
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 400),
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       decoration: rowDecor,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text("JUMU'AH", 
             style: TextStyle(
               color: isNext ? theme.accentBright : theme.text, 
               fontSize: 16, 
               fontWeight: isNext ? FontWeight.w900 : FontWeight.w700, 
-              letterSpacing: 1
+              letterSpacing: 1,
+              shadows: isNext ? [
+                Shadow(color: theme.accentBright.withOpacity(0.6), blurRadius: 12)
+              ] : null,
             )),
-          const SizedBox(height: 4),
-          _subscriptTime(time, 22, isNext ? FontWeight.w900 : FontWeight.w700, theme, isAccent: true, isNext: isNext),
+          _subscriptTime(time, 20, isNext ? FontWeight.w900 : FontWeight.w700, theme, isAccent: true, isNext: isNext),
         ],
       ),
     );
@@ -372,16 +356,16 @@ class _ContentScreenState extends State<ContentScreen> {
   }
 
   Widget _subscriptTime(String time, double fontSize, FontWeight weight, ThemeConfig theme, {bool isAccent = false, bool isNext = false, bool isCurrent = false}) {
-    final cMain = isAccent 
-        ? (isNext ? theme.accentBright : (isCurrent ? theme.accent : theme.accentBright))
-        : (isNext ? theme.accent : (isCurrent ? theme.accent.withOpacity(0.8) : theme.text));
+    final cMain = isNext 
+        ? theme.accentBright
+        : (isCurrent ? theme.accent : (isAccent ? theme.accentBright : theme.text));
     final cSub = isAccent ? theme.accent : theme.textMuted;
     final sp = time.split(' ');
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(sp[0], style: TextStyle(color: cMain, fontSize: fontSize, fontWeight: weight)),
+        Text(sp[0], style: TextStyle(color: cMain, fontSize: fontSize, fontWeight: isNext ? FontWeight.w900 : (isCurrent ? FontWeight.w700 : weight))),
         if (sp.length > 1)
           Padding(
             padding: const EdgeInsets.only(bottom: 1, left: 2),

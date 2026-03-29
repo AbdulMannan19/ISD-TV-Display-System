@@ -28,6 +28,7 @@ class SharedData {
     try {
       await _fetchFromApi();
       await _loadIqamahFromDb();
+      _calculateLastThird();
       _computeNextTarget();
     } finally {
       _isFetching = false;
@@ -39,6 +40,7 @@ class SharedData {
     _isFetching = true;
     try {
       await _loadIqamahFromDb();
+      _calculateLastThird();
       _computeNextTarget();
     } finally {
       _isFetching = false;
@@ -67,6 +69,41 @@ class SharedData {
       'adhan': p['adhan'] as String,
       'iqamah': p['iqamah'] as String,
     }).toList();
+    _calculateLastThird();
+  }
+
+  String lastThird = '--';
+
+  void _calculateLastThird() {
+    if (prayers.isEmpty) return;
+    String? fajrStr;
+    String? maghribStr;
+    
+    // Check both uppercase and potential lowercase just in case
+    for (final p in prayers) {
+      final name = p['name']!.toUpperCase();
+      if (name == 'FAJR') fajrStr = p['adhan'];
+      if (name == 'MAGHRIB') maghribStr = p['adhan'];
+    }
+    
+    if (fajrStr == null || maghribStr == null) return;
+
+    final now = DateTime.now();
+    final fDt = _parseTime(fajrStr, now);
+    final mDt = _parseTime(maghribStr, now);
+
+    if (fDt != null && mDt != null) {
+      // Logic: Maghrib to Fajr (Next Day)
+      final fajrNext = fDt.add(const Duration(days: 1));
+      final nightDuration = fajrNext.difference(mDt);
+      final oneThirdMins = nightDuration.inMinutes / 3;
+      final lastThirdStart = fajrNext.subtract(Duration(minutes: oneThirdMins.round()));
+      
+      final h = lastThirdStart.hour > 12 ? lastThirdStart.hour - 12 : (lastThirdStart.hour == 0 ? 12 : lastThirdStart.hour);
+      final m = lastThirdStart.minute.toString().padLeft(2, '0');
+      final p = lastThirdStart.hour >= 12 ? 'PM' : 'AM';
+      lastThird = '$h:$m $p';
+    }
   }
 
   Future<void> _loadIqamahFromDb() async {
@@ -185,6 +222,15 @@ class SharedData {
       }
     }
     return 0; // Fallback to Fajr
+  }
+
+  String getNextPrayerName() {
+    final idx = getNextPrayerIndex();
+    if (idx == -2) return "JUMU'AH";
+    if (idx >= 0 && idx < prayers.length) {
+      return prayers[idx]['name']!;
+    }
+    return "PRAYER";
   }
 
   String _to12(String time) {

@@ -38,6 +38,7 @@ export default function EmbedPrayerTimes() {
     const [times, setTimes] = useState({});
     const [hijriDate, setHijriDate] = useState('');
     const [sunrise, setSunrise] = useState('');
+    const [lastThird, setLastThird] = useState('');
     const [currentTheme, setCurrentTheme] = useState(null);
     const [loading, setLoading] = useState(true);
     const isFetching = useRef(false);
@@ -87,6 +88,18 @@ export default function EmbedPrayerTimes() {
                             rawSunrise = rawSunrise.split(' ')[0];
                         }
                         setSunrise(rawSunrise);
+
+                        let rawFajr = json.data.timings.Fajr || '';
+                        if (rawFajr && rawSunrise) {
+                            // Option 2: Sunset (Maghrib) to Fajr
+                            const maghribMins = parseTimeMins(json.data.timings.Maghrib);
+                            const fajrMins = parseTimeMins(json.data.timings.Fajr);
+                            const duration = (fajrMins + 1440) - maghribMins;
+                            const lastThirdMins = (fajrMins + 1440 - (duration / 3)) % 1440;
+                            const h = Math.floor(lastThirdMins / 60);
+                            const m = Math.floor(lastThirdMins % 60);
+                            setLastThird(`${h}:${String(m).padStart(2, '0')}`);
+                        }
                     }
                 } catch (_) { }
             };
@@ -265,6 +278,16 @@ export default function EmbedPrayerTimes() {
                                     <tr key="sunrise" className="embed-sunrise-row">
                                         <td className="embed-prayer-name">Sunrise</td>
                                         <td colSpan="2" className="embed-sunrise-time">{to12(sunrise)}</td>
+                                    </tr>
+                                ];
+                            }
+
+                            if (p === 'isha' && lastThird) {
+                                return [
+                                    row,
+                                    <tr key="lastThird" className="embed-sunrise-row">
+                                        <td className="embed-prayer-name">Last Third</td>
+                                        <td colSpan="2" className="embed-sunrise-time">{to12(lastThird)}</td>
                                     </tr>
                                 ];
                             }

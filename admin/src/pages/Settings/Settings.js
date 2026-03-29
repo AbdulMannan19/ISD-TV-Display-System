@@ -75,36 +75,38 @@ export default function Settings() {
     }
   };
 
-  const handleSave = async () => {
-    if (!previewThemeId || previewThemeId === savedThemeId) return;
+  const updateTheme = async (themeId) => {
+    setPreviewThemeId(themeId);
+    if (themeId === savedThemeId) return;
+
     setSaving(true);
-    const { error } = await supabase.from('settings').upsert({ id: 1, theme_id: previewThemeId });
+    const { error } = await supabase.from('settings').upsert({ id: 1, theme_id: themeId });
     setSaving(false);
+
     if (error) {
-      setStatus('Error saving theme.');
+      setStatus('Error applying theme.');
     } else {
-      setSavedThemeId(previewThemeId);
-      setStatus('Theme applied to display!');
-      setTimeout(() => setStatus(''), 3000);
+      setSavedThemeId(themeId);
+      setStatus('Theme applied!');
+      setTimeout(() => setStatus(''), 2000);
     }
   };
 
   const previewTheme = ALL_THEMES.find(t => t.id === previewThemeId);
-  const hasUnsaved = previewThemeId !== savedThemeId;
 
   const renderCard = (theme) => {
     const isSelected = previewThemeId === theme.id;
-    const isSaved = savedThemeId === theme.id;
+    const isLive = savedThemeId === theme.id;
     return (
       <div
         key={theme.id}
-        className={`theme-card ${isSelected ? 'selected' : ''} ${isSaved ? 'saved' : ''}`}
-        onClick={() => setPreviewThemeId(theme.id)}
+        className={`theme-card ${isSelected ? 'selected' : ''} ${isLive ? 'saved' : ''}`}
+        onClick={() => updateTheme(theme.id)}
         title={theme.description}
       >
         <div className="theme-swatch" style={{ backgroundColor: theme.bg }}>
           <div className="theme-dot" style={{ backgroundColor: theme.accent }} />
-          {isSaved && <span className="theme-live-badge">LIVE</span>}
+          {isLive && <span className="theme-live-badge">LIVE</span>}
         </div>
         <span className="theme-label">{theme.name}</span>
       </div>
@@ -116,7 +118,7 @@ export default function Settings() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Display Settings</h1>
-          <p className="page-subtitle">Pick a theme → preview it → save to apply to the TV.</p>
+          <p className="page-subtitle">Pick a theme to apply it instantly to the display TV.</p>
         </div>
       </div>
 
@@ -139,7 +141,7 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* ── Right: preview + save ── */}
+        {/* ── Right: preview ── */}
         <div className="settings-right">
           <div className="preview-panel">
             <div className="preview-header">
@@ -149,18 +151,9 @@ export default function Settings() {
                 </span>
                 <span className="preview-desc">{previewTheme?.description}</span>
               </div>
-              {hasUnsaved && <span className="preview-unsaved">Unsaved</span>}
             </div>
 
             <DisplayPreview theme={previewTheme} />
-
-            <button
-              className="save-btn"
-              onClick={handleSave}
-              disabled={saving || !hasUnsaved}
-            >
-              {saving ? 'Saving…' : hasUnsaved ? 'Save & Apply to Display' : '✓ Currently Applied'}
-            </button>
           </div>
         </div>
       </div>

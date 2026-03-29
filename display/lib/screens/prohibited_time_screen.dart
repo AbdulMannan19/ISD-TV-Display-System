@@ -53,16 +53,16 @@ class _ProhibitedTimeScreenState extends State<ProhibitedTimeScreen> {
         color: cardBg,
         borderRadius: BorderRadius.circular(20),
       ),
-      padding: const EdgeInsets.all(36),
+      padding: const EdgeInsets.fromLTRB(36, 12, 36, 36),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text('PROHIBITED TIME FOR VOLUNTARY SALAH',
             textAlign: TextAlign.center,
             style: TextStyle(color: accent.withOpacity(0.8),
               fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 3)),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Expanded(
             child: Center(
               child: SingleChildScrollView(
@@ -100,7 +100,7 @@ class _ProhibitedTimeScreenState extends State<ProhibitedTimeScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(

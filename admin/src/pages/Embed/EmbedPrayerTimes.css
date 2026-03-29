@@ -156,33 +156,43 @@
   padding-right: 16px !important;
 }
 
-/* Premium Highlight Styles for Current and Next Prayers */
-/* Premium Highlight Styles for Current and Next Prayers - Matching Flutter Logic */
-.embed-current-prayer, .embed-current-prayer td {
-  background-color: color-mix(in srgb, var(--theme-accent), transparent 85%) !important;
-  color: var(--theme-accent) !important; 
-  font-weight: 600 !important;
+.embed-current-prayer,
+.embed-current-prayer td {
+  background-color: color-mix(in srgb, var(--theme-accent), transparent 93%) !important;
+  color: var(--theme-accent, #f0c878) !important;
+  font-weight: 700 !important;
+  transition: all 0.4s ease;
 }
 
 .embed-current-prayer .embed-prayer-name,
 .embed-current-prayer .embed-jummah-label {
-  color: var(--theme-accent) !important;
+  color: var(--theme-accent, #f0c878) !important;
 }
 
-.embed-next-prayer, .embed-next-prayer td {
-  background-color: color-mix(in srgb, var(--theme-accent), transparent 82%) !important;
-  box-shadow: 0 0 12px 1px color-mix(in srgb, var(--theme-accent), transparent 80%) !important;
-  color: var(--theme-accent-bright) !important;
+.embed-next-prayer,
+.embed-next-prayer td {
+  background: color-mix(in srgb, var(--theme-accent-bright), transparent 90%) !important;
+  color: var(--theme-accent-bright, #ffffff) !important;
   font-weight: 900 !important;
   z-index: 1;
   position: relative;
+  transition: all 0.4s ease;
+  /* Diffuse "Floating Light" glow */
+  text-shadow: 0 0 20px color-mix(in srgb, var(--theme-accent-bright), transparent 30%) !important;
 }
 
 .embed-next-prayer .embed-prayer-name,
 .embed-next-prayer .embed-jummah-label,
 .embed-next-prayer .embed-jummah-time {
-  color: var(--theme-accent-bright) !important;
+  color: var(--theme-accent-bright, #ffffff) !important;
   font-weight: 900 !important;
+}
+
+/* Jumu'ah special handling for Next state */
+.embed-jummah.embed-next-prayer {
+  background: color-mix(in srgb, var(--theme-accent-bright), transparent 85%) !important;
+  border: 1px solid color-mix(in srgb, var(--theme-accent-bright), transparent 70%) !important;
+  box-shadow: 0 0 35px color-mix(in srgb, var(--theme-accent-bright), transparent 85%) !important;
 }
 
 /* Make it fit on smaller mobile screens without horizontal overflow */
