@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'content_screen.dart';
+import '../services/shared_data.dart';
 
 class ProhibitedTimeScreen extends StatefulWidget {
   final DateTime endTime;
@@ -25,7 +26,7 @@ class _ProhibitedTimeScreenState extends State<ProhibitedTimeScreen> {
   }
 
   void _updateRemainingTime() {
-    final remaining = widget.endTime.difference(DateTime.now());
+    final remaining = widget.endTime.difference(SharedData.instance.now);
     final secs = remaining.inSeconds < 0 ? 0 : remaining.inSeconds;
     _remainingMinutes = (secs / 60).ceil().clamp(1, 15);
   }

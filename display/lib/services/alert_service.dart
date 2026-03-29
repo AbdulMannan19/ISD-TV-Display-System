@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'shared_data.dart';
 
 class AlertService {
   AlertService._();
@@ -23,7 +24,7 @@ class AlertService {
 
   Future<void> _fetchAlerts() async {
     try {
-      final now = DateTime.now().toUtc().toIso8601String();
+      final now = SharedData.instance.now.toUtc().toIso8601String();
       final response = await Supabase.instance.client
           .from('alerts')
           .select('text')

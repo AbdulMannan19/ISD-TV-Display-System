@@ -7,6 +7,8 @@ class TestControls extends StatelessWidget {
   final VoidCallback onTestSilence;
   final VoidCallback onTestProhibited;
   final VoidCallback onExit;
+  final Function(Duration) onTimeShift;
+  final VoidCallback onTimeReset;
 
   const TestControls({
     super.key,
@@ -15,6 +17,8 @@ class TestControls extends StatelessWidget {
     required this.onTestSilence,
     required this.onTestProhibited,
     required this.onExit,
+    required this.onTimeShift,
+    required this.onTimeReset,
   });
 
   @override
@@ -26,17 +30,50 @@ class TestControls extends StatelessWidget {
         if (event is! KeyDownEvent) return;
 
         final isCtrl = HardwareKeyboard.instance.isControlPressed;
+        final isShift = HardwareKeyboard.instance.isShiftPressed;
 
-        if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-          onPrevious();
-        } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-          onNext();
-        } else if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyS) {
-          onTestSilence();
-        } else if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyP) {
-          onTestProhibited();
-        } else if (event.logicalKey == LogicalKeyboardKey.escape) {
+        // Reset/Exit Logic
+        if (event.logicalKey == LogicalKeyboardKey.escape) {
+          onTimeReset();
           onExit();
+          return;
+        }
+
+        // --- Mode Toggles (Ctrl + Key) ---
+        if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyS) {
+          onTestSilence();
+          return;
+        }
+        if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyP) {
+          onTestProhibited();
+          return;
+        }
+
+        // --- Time Simulation (Ctrl + Arrows = Hours, Shift + Arrows = Minutes, Shift + Horiz = Days) ---
+        if (isCtrl) {
+          if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+            onTimeShift(const Duration(hours: 1));
+          } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+            onTimeShift(const Duration(hours: -1));
+          }
+        } else if (isShift) {
+          if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+            onTimeShift(const Duration(minutes: 1));
+          } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+            onTimeShift(const Duration(minutes: -1));
+          } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+            onTimeShift(const Duration(days: 1));
+          } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+            onTimeShift(const Duration(days: -1));
+          }
+        } 
+        // --- Standard Navigation (Arrows without modifiers) ---
+        else {
+          if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+            onPrevious();
+          } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+            onNext();
+          }
         }
       },
       child: const SizedBox.shrink(),

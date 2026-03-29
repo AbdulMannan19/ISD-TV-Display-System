@@ -30,7 +30,7 @@ class DisplayModeService {
     _iqamahLockTimer?.cancel();
 
     // Determine the correct mode based on current time
-    final now = DateTime.now();
+    final now = SharedData.instance.now;
     final shared = SharedData.instance;
 
     // Check if we're in a silence window (past an iqamah, within silence duration)
@@ -46,10 +46,12 @@ class DisplayModeService {
 
     // Check silence: iqamah passed but within silence duration
     for (final iq in iqamahDts) {
-      if (now.isAfter(iq)) {
+      if (!now.isBefore(iq)) {
         final isFridayJummah = now.weekday == DateTime.friday &&
             shared.jummah.isNotEmpty &&
-            _parseTimeToday(shared.jummah) == iq;
+            _parseTimeToday(shared.jummah) != null &&
+            _parseTimeToday(shared.jummah)!.hour == iq.hour &&
+            _parseTimeToday(shared.jummah)!.minute == iq.minute;
         final silenceMins = isFridayJummah ? 45 : 10;
         final silenceEnd = iq.add(Duration(minutes: silenceMins));
         if (now.isBefore(silenceEnd)) {
@@ -93,7 +95,8 @@ class DisplayModeService {
   void _scheduleSilenceExit() {
     _silenceTimer?.cancel();
     if (mode != DisplayMode.silence || silenceEndTime == null) return;
-    final remaining = silenceEndTime!.difference(DateTime.now());
+    final now = SharedData.instance.now;
+    final remaining = silenceEndTime!.difference(now);
     if (remaining.isNegative) {
       mode = DisplayMode.normal;
       silenceEndTime = null;
@@ -101,6 +104,7 @@ class DisplayModeService {
       scheduleIqamahLock();
       return;
     }
+    // We keep the timer for real-time exit, but simulation can jump ahead
     _silenceTimer = Timer(remaining, () {
       mode = DisplayMode.normal;
       silenceEndTime = null;
@@ -111,7 +115,7 @@ class DisplayModeService {
 
   void scheduleProhibited() {
     _prohibitedTimer?.cancel();
-    final now = DateTime.now();
+    final now = SharedData.instance.now;
     final shared = SharedData.instance;
 
     if (mode == DisplayMode.prohibited && prohibitedEndTime != null) {
@@ -202,7 +206,7 @@ class DisplayModeService {
 
   void scheduleIqamahLock() {
     _iqamahLockTimer?.cancel();
-    final now = DateTime.now();
+    final now = SharedData.instance.now;
     final shared = SharedData.instance;
 
     if (mode == DisplayMode.iqamahLock && iqamahLockEndTime != null) {
@@ -257,13 +261,16 @@ class DisplayModeService {
 
   void _enterSilenceFromLock(DateTime iqamahTime) {
     iqamahLockEndTime = null;
-    final isFridayJummah = DateTime.now().weekday == DateTime.friday &&
+    final now = SharedData.instance.now;
+    final isFridayJummah = now.weekday == DateTime.friday &&
         SharedData.instance.jummah.isNotEmpty &&
-        _parseTimeToday(SharedData.instance.jummah) == iqamahTime;
+        _parseTimeToday(SharedData.instance.jummah) != null &&
+        _parseTimeToday(SharedData.instance.jummah)!.hour == iqamahTime.hour &&
+        _parseTimeToday(SharedData.instance.jummah)!.minute == iqamahTime.minute;
     final duration = isFridayJummah ? 45 : 10;
 
     mode = DisplayMode.silence;
-    silenceEndTime = DateTime.now().add(Duration(minutes: duration));
+    silenceEndTime = now.add(Duration(minutes: duration));
     _onModeChanged?.call();
     _scheduleSilenceExit();
   }
@@ -287,7 +294,7 @@ class DisplayModeService {
   DateTime? _parseTimeToday(String time) {
     try {
       final trimmed = time.trim();
-      final now = DateTime.now();
+      final now = SharedData.instance.now;
       if (trimmed.contains('AM') || trimmed.contains('PM')) {
         final parts = trimmed.split(' ');
         final tp = parts[0].split(':');

@@ -6,6 +6,14 @@ class SharedData {
   SharedData._();
   static final instance = SharedData._();
 
+  // --- SIMULATION CONFIG ---
+  // Set to true to enable keyboard shortcuts and UI for time testing
+  static const bool configEnableSimulation = false;
+
+  DateTime? _overrideTime;
+  DateTime get now => (configEnableSimulation && _overrideTime != null) ? _overrideTime! : DateTime.now();
+  bool get isSimulated => configEnableSimulation && _overrideTime != null;
+
   String sunrise = '';
   String sunset = '';
   String jummah = '';
@@ -45,6 +53,71 @@ class SharedData {
     } finally {
       _isFetching = false;
     }
+  }
+
+  Future<void> recompute() async {
+    _updateIqamahDateTimes();
+    _calculateLastThird();
+    _computeNextTarget();
+  }
+
+  void _updateIqamahDateTimes() {
+    final now = this.now;
+    final isFriday = now.weekday == DateTime.friday;
+    final times = <DateTime>[];
+    
+    // Use the strings we already have in the prayers list
+    for (final p in prayers) {
+      final prayer = p['name']!.toLowerCase();
+      // Skip zuhr on Friday and jumu'ah on non-Friday
+      if (isFriday && prayer == 'dhuhr') continue;
+      if (!isFriday && prayer.startsWith('jumu')) continue;
+      
+      final dt = _parseTime(p['iqamah']!, now);
+      if (dt != null) times.add(dt);
+    }
+    
+    // Also include Jumu'ah explicitly if needed
+    if (isFriday && jummah.isNotEmpty) {
+      final jDt = _parseTime(jummah, now);
+      if (jDt != null && !times.any((t) => t.hour == jDt.hour && t.minute == jDt.minute)) {
+        times.add(jDt);
+      }
+    }
+
+    times.sort();
+    _iqamahDateTimes = times;
+  }
+
+  void setOverrideTime(DateTime? time) {
+    final oldDate = _overrideTime ?? DateTime.now();
+    _overrideTime = time;
+    final newDate = this.now;
+    
+    // If the date (Y-M-D) has changed, re-fetch from API to update Hijri date and timings
+    if (oldDate.year != newDate.year || oldDate.month != newDate.month || oldDate.day != newDate.day) {
+      _fetchFromApi().then((_) {
+        recompute();
+        // Also fetch daily content for the new day
+        fetchDailyContent();
+      });
+    } else {
+      recompute();
+    }
+  }
+
+  void setManualTime(String dateTimeStr) {
+    try {
+      final oldDate = this.now;
+      _overrideTime = DateTime.parse(dateTimeStr);
+      final newDate = this.now;
+
+      if (oldDate.year != newDate.year || oldDate.month != newDate.month || oldDate.day != newDate.day) {
+        _fetchFromApi().then((_) => recompute());
+      } else {
+        recompute();
+      }
+    } catch (_) {}
   }
 
   Future<void> fetchDailyContent() async {
@@ -88,7 +161,7 @@ class SharedData {
     
     if (fajrStr == null || maghribStr == null) return;
 
-    final now = DateTime.now();
+    final now = this.now;
     final fDt = _parseTime(fajrStr, now);
     final mDt = _parseTime(maghribStr, now);
 
@@ -111,7 +184,7 @@ class SharedData {
       final response = await Supabase.instance.client
           .from('prayer_times')
           .select('prayer, iqamah');
-      final now = DateTime.now();
+      final now = this.now;
       final isFriday = now.weekday == DateTime.friday;
       final times = <DateTime>[];
       for (final row in response as List) {
@@ -141,7 +214,7 @@ class SharedData {
   }
 
   void _computeNextTarget() {
-    final now = DateTime.now();
+    final now = this.now;
     _nextIqamahTarget = null;
     for (final dt in _iqamahDateTimes) {
       if (dt.isAfter(now)) {
@@ -156,7 +229,7 @@ class SharedData {
 
   String getCountdown() {
     if (_nextIqamahTarget == null) return '--';
-    final now = DateTime.now();
+    final now = this.now;
     if (now.isAfter(_nextIqamahTarget!)) {
       _computeNextTarget();
       if (_nextIqamahTarget == null) return '--';
@@ -174,7 +247,7 @@ class SharedData {
   /// Returns -1 if none determined yet.
   int getCurrentPrayerIndex() {
     if (prayers.isEmpty) return -1;
-    final now = DateTime.now();
+    final now = this.now;
     final adhans = prayers.map((p) => _parseTime(p['adhan']!, now)).toList();
     int current = -1;
     for (int i = 0; i < adhans.length; i++) {
@@ -194,7 +267,7 @@ class SharedData {
   /// Returns -1 if none found, -2 if Jumu'ah.
   int getNextPrayerIndex() {
     if (prayers.isEmpty || _iqamahDateTimes.isEmpty) return -1;
-    final now = DateTime.now();
+    final now = this.now;
     DateTime? target;
     for (final dt in _iqamahDateTimes) {
       if (dt.isAfter(now)) {

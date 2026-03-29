@@ -169,7 +169,7 @@ class _ScreenRotatorState extends State<ScreenRotator> {
   }
 
   void _scheduleMidnightRefresh() {
-    final now = DateTime.now();
+    final now = SharedData.instance.now;
     // 12:01 AM — 1 min buffer to ensure Gregorian date has changed
     final next = DateTime(now.year, now.month, now.day + 1, 0, 1);
     _midnightTimer = Timer(next.difference(now), () {
@@ -191,8 +191,8 @@ class _ScreenRotatorState extends State<ScreenRotator> {
   void _scheduleMaghribRefresh() {
     final maghribDt = _parseTimeToday(SharedData.instance.sunset);
     if (maghribDt == null) return;
-
-    final now = DateTime.now();
+    
+    final now = SharedData.instance.now;
     final refreshTime = maghribDt.add(const Duration(minutes: 1));
 
     if (refreshTime.isBefore(now)) return;
@@ -325,7 +325,7 @@ class _ScreenRotatorState extends State<ScreenRotator> {
   DateTime? _parseTimeToday(String time) {
     try {
       final trimmed = time.trim();
-      final now = DateTime.now();
+      final now = SharedData.instance.now;
       if (trimmed.contains('AM') || trimmed.contains('PM')) {
         final parts = trimmed.split(' ');
         final tp = parts[0].split(':');
@@ -383,22 +383,81 @@ class _ScreenRotatorState extends State<ScreenRotator> {
           DisplayMode.normal => IndexedStack(index: _currentIndex, children: _screens),
         },
         if (showAlerts) _buildAlertMarquee(),
-        TestControls(
-          onPrevious: () {
-            if (_screensBuilt && _displayMode.mode == DisplayMode.normal) {
-              setState(() => _currentIndex = (_currentIndex - 1 + _screens.length) % _screens.length);
-            }
-          },
-          onNext: () {
-            if (_screensBuilt && _displayMode.mode == DisplayMode.normal) {
-              setState(() => _currentIndex = (_currentIndex + 1) % _screens.length);
-            }
-          },
-          onTestSilence: () => setState(() => _displayMode.setTestSilence()),
-          onTestProhibited: () => setState(() => _displayMode.setTestProhibited()),
-          onExit: () => setState(() => _displayMode.exitSpecialMode()),
-        ),
+        if (SharedData.instance.isSimulated) _buildSimulatedIndicator(),
+        if (SharedData.configEnableSimulation)
+          TestControls(
+            onPrevious: () {
+              if (_screensBuilt && _displayMode.mode == DisplayMode.normal) {
+                setState(() => _currentIndex = (_currentIndex - 1 + _screens.length) % _screens.length);
+              }
+            },
+            onNext: () {
+              if (_screensBuilt && _displayMode.mode == DisplayMode.normal) {
+                setState(() => _currentIndex = (_currentIndex + 1) % _screens.length);
+              }
+            },
+            onTestSilence: () => setState(() => _displayMode.setTestSilence()),
+            onTestProhibited: () => setState(() => _displayMode.setTestProhibited()),
+            onExit: () => setState(() => _displayMode.exitSpecialMode()),
+            onTimeShift: (offset) {
+              setState(() {
+                SharedData.instance.setOverrideTime(SharedData.instance.now.add(offset));
+                _displayMode.reevaluate();
+                // Update scheduled refresh timers based on new simulated time
+                _midnightTimer?.cancel();
+                _maghribRefreshTimer?.cancel();
+                _scheduleMidnightRefresh();
+                _scheduleMaghribRefresh();
+              });
+            },
+            onTimeReset: () {
+              setState(() {
+                SharedData.instance.setOverrideTime(null);
+                _displayMode.reevaluate();
+                _midnightTimer?.cancel();
+                _maghribRefreshTimer?.cancel();
+                _scheduleMidnightRefresh();
+                _scheduleMaghribRefresh();
+              });
+            },
+          ),
       ],
+    );
+  }
+
+  Widget _buildSimulatedIndicator() {
+    final now = SharedData.instance.now;
+    final timeStr = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')} (Day ${now.day})";
+    return Positioned(
+      bottom: 20,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.amber.shade900.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.timer, color: Colors.white, size: 16),
+              SizedBox(width: 8),
+              Text(
+                "SIMULATED: $timeStr",
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+              SizedBox(width: 12),
+              Text(
+                "ESC to Reset",
+                style: TextStyle(color: Colors.white70, fontSize: 11),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

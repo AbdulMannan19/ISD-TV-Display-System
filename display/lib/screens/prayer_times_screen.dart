@@ -19,9 +19,9 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   @override
   void initState() {
     super.initState();
-    _now = DateTime.now();
+    _now = SharedData.instance.now;
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      setState(() => _now = DateTime.now());
+      setState(() => _now = SharedData.instance.now);
     });
   }
 

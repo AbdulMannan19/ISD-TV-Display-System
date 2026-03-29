@@ -11,7 +11,7 @@ class SlidesService {
           .select('*')
           .order('display_order', ascending: true);
 
-      final now = DateTime.now();
+      final now = SharedData.instance.now;
       final todayStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
       final dayName = _dayName(now.weekday);
 
