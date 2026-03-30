@@ -156,25 +156,24 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   }
 
   Widget _buildJumuahBox(ThemeConfig theme) {
+    final currentIdx = SharedData.instance.getCurrentPrayerIndex();
     final nextIdx = SharedData.instance.getNextPrayerIndex();
+    final isCurrent = currentIdx == -2;
     final isNext = nextIdx == -2;
     
+    final isHighlighted = isCurrent || isNext;
+    final highlightMain = isCurrent ? theme.accentBright : theme.accent;
+    final highlightWeight = isCurrent ? FontWeight.w900 : FontWeight.bold;
+
     return Container(
       decoration: BoxDecoration(
-        color: isNext 
-            ? theme.accent.withOpacity(0.18) 
+        color: isHighlighted 
+            ? (isCurrent ? theme.accentBright.withOpacity(0.18) : theme.accent.withOpacity(0.12))
             : theme.accent.withOpacity(0.06),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: isNext ? theme.accentBright : theme.accent.withOpacity(0.15)
+          color: isHighlighted ? highlightMain : theme.accent.withOpacity(0.15)
         ),
-        boxShadow: isNext ? [
-          BoxShadow(
-            color: theme.accent.withOpacity(0.35),
-            blurRadius: 25,
-            spreadRadius: 3,
-          )
-        ] : null,
       ),
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       child: Row(
@@ -183,8 +182,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           Text(
             "JUMU'AH",
             style: TextStyle(
-              color: isNext ? theme.accentBright : theme.text,
-              fontWeight: isNext ? FontWeight.w900 : FontWeight.bold,
+              color: isHighlighted ? highlightMain : theme.text,
+              fontWeight: highlightWeight,
               fontSize: 15,
               letterSpacing: 3,
             ),
@@ -193,10 +192,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           _subscriptTime(
             SharedData.instance.jummah, 
             28, 
-            isNext ? FontWeight.w900 : FontWeight.w600, 
+            highlightWeight, 
             theme, 
             isAccent: true,
             isNext: isNext,
+            isCurrent: isCurrent,
           ),
         ],
       ),
@@ -209,16 +209,16 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     bool isCurrent = false,
     bool isNext = false,
   }) {
-    final nameFg = isNext 
+    final nameFg = isCurrent 
         ? theme.accentBright 
-        : (isCurrent ? theme.accent : theme.text);
+        : (isNext ? theme.accent : theme.text);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 400),
       decoration: BoxDecoration(
-        color: isNext 
+        color: isCurrent 
             ? theme.accentBright.withOpacity(0.12) 
-            : (isCurrent ? theme.accent.withOpacity(0.08) : Colors.transparent),
+            : (isNext ? theme.accent.withOpacity(0.08) : Colors.transparent),
         borderRadius: BorderRadius.circular(10),
       ),
       margin: const EdgeInsets.symmetric(vertical: 6),
@@ -231,15 +231,9 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               p['name']!,
               style: TextStyle(
                 color: nameFg,
-                fontWeight: isNext ? FontWeight.w900 : (isCurrent ? FontWeight.w700 : FontWeight.bold),
+                fontWeight: isCurrent ? FontWeight.w900 : (isNext ? FontWeight.w700 : FontWeight.bold),
                 fontSize: 22,
                 letterSpacing: 1.5,
-                shadows: isNext ? [
-                  Shadow(
-                    color: theme.accentBright.withOpacity(0.6),
-                    blurRadius: 15,
-                  )
-                ] : null,
               ),
             ),
           ),
@@ -252,10 +246,12 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
 
   Widget _timeCell(String time, ThemeConfig theme, {bool isAccent = false, bool dimmed = false, bool isNext = false, bool isCurrent = false}) {
     final sp = time.split(' ');
-    final primaryColor = isNext
+    final primaryColor = isCurrent
         ? theme.accentBright
-        : (isCurrent ? theme.accent : (isAccent ? theme.accentBright : theme.text));
-    final secColor     = isAccent ? theme.accent : theme.textMuted;
+        : (isNext ? theme.accent : (isAccent ? theme.accentBright : theme.text));
+    final secColor     = (isNext || isCurrent) 
+        ? primaryColor 
+        : (isAccent ? theme.accent : theme.textMuted);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -266,10 +262,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           style: TextStyle(
             color: primaryColor,
             fontSize: 40,
-            fontWeight: isNext ? FontWeight.w900 : (isCurrent ? FontWeight.w700 : FontWeight.w600),
-            shadows: isNext ? [
-              Shadow(color: theme.accentBright.withOpacity(0.8), blurRadius: 20)
-            ] : (isAccent && !dimmed && theme.glowIntensity > 1.0 ? [
+            fontWeight: isCurrent ? FontWeight.w900 : (isNext ? FontWeight.w700 : FontWeight.w600),
+            shadows: (isAccent && !dimmed && theme.glowIntensity > 1.0 ? [
               Shadow(color: theme.accent, blurRadius: 10 * theme.glowIntensity)
             ] : null),
           ),
@@ -444,9 +438,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
 
   Widget _subscriptTime(String time, double fontSize, FontWeight weight, ThemeConfig theme, {bool isAccent = false, bool isNext = false, bool isCurrent = false}) {
     final cMain = isAccent 
-        ? (isNext ? theme.accentBright : (isCurrent ? theme.accent : theme.accentBright))
-        : (isNext ? theme.accent : (isCurrent ? theme.accent : theme.text));
-    final cSub = isAccent ? theme.accent : theme.textMuted;
+        ? (isCurrent ? theme.accentBright : (isNext ? theme.accent : theme.accentBright))
+        : (isCurrent ? theme.accent : (isNext ? theme.accent : theme.text));
+    final cSub = (isNext || isCurrent)
+        ? cMain
+        : (isAccent ? theme.accent : theme.textMuted);
     final sp = time.split(' ');
     return Row(
       mainAxisSize: MainAxisSize.min,

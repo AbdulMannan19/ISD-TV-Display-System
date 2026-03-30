@@ -66,7 +66,7 @@ class PrayerTimesService {
       final dhuhrIqamah = iqamahTimes['zuhr'] ?? _addMinutes(dhuhrAdhan, 19);
       final asrIqamah = iqamahTimes['asr'] ?? _addMinutes(asrAdhan, 19);
       final ishaIqamah = iqamahTimes['isha'] ?? _addMinutes(ishaAdhan, 28);
-      final maghribIqamah = iqamahTimes['maghrib'] ?? _addMinutes(maghribAdhan, 10);
+      final maghribIqamah = _addMinutes(maghribAdhan, 10);
       final jummah1 = iqamahTimes['jummah'] ?? '1:45 PM';
 
       await _updateDbTimes(

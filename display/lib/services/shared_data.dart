@@ -8,7 +8,7 @@ class SharedData {
 
   // --- SIMULATION CONFIG ---
   // Set to true to enable keyboard shortcuts and UI for time testing
-  static const bool configEnableSimulation = false;
+  static const bool configEnableSimulation = true;
 
   DateTime? _overrideTime;
   DateTime get now => (configEnableSimulation && _overrideTime != null) ? _overrideTime! : DateTime.now();
@@ -200,10 +200,18 @@ class SharedData {
       }
       final nameToKey = {'FAJR': 'fajr', 'DHUHR': 'zuhr', 'ASR': 'asr', 'MAGHRIB': 'maghrib', 'ISHA': 'isha'};
       prayers = prayers.map((p) {
-        final key = nameToKey[p['name']];
+        final name = p['name']!;
+        if (name.toUpperCase() == 'MAGHRIB') {
+          return {
+            'name': name,
+            'adhan': p['adhan']!,
+            'iqamah': _addMinutes(p['adhan']!, 10),
+          };
+        }
+        final key = nameToKey[name];
         final dbIqamah = key != null ? iqamahMap[key] : null;
         return {
-          'name': p['name']!,
+          'name': name,
           'adhan': p['adhan']!,
           'iqamah': dbIqamah != null ? _to12(dbIqamah) : p['iqamah']!,
         };
@@ -258,7 +266,14 @@ class SharedData {
     // If it's before the first prayer of the day (Fajr), 
     // the current prayer is the last one of the previous day (Isha).
     if (current == -1 && adhans.isNotEmpty) {
-      return adhans.length - 1;
+      current = adhans.length - 1;
+    }
+
+    // On Fridays, Dhuhr adhan marks the start of Jumu'ah window.
+    if (current != -1 && now.weekday == DateTime.friday) {
+      if (prayers[current]['name']?.toUpperCase() == 'DHUHR') {
+        return -2; // Map Dhuhr to Jumu'ah highlight index 
+      }
     }
     return current;
   }
@@ -314,6 +329,16 @@ class SharedData {
     final h = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
     final p = hour >= 12 ? 'PM' : 'AM';
     return '$h:${minute.toString().padLeft(2, '0')} $p';
+  }
+
+  String _addMinutes(String timeStr, int minutes) {
+    final dt = _parseTime(timeStr, now);
+    if (dt == null) return timeStr;
+    final newDt = dt.add(Duration(minutes: minutes));
+    final h = newDt.hour > 12 ? newDt.hour - 12 : (newDt.hour == 0 ? 12 : newDt.hour);
+    final m = newDt.minute.toString().padLeft(2, '0');
+    final p = newDt.hour >= 12 ? 'PM' : 'AM';
+    return '$h:$m $p';
   }
 
   DateTime? _parseTime(String time, DateTime now) {

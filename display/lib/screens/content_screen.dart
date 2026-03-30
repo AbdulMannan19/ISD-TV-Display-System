@@ -281,13 +281,13 @@ class _ContentScreenState extends State<ContentScreen> {
     bool isCurrent = false,
     bool isNext    = false,
   }) {
-    final nameFg = isNext 
+    final nameFg = isCurrent 
         ? theme.accentBright 
-        : (isCurrent ? theme.accent : theme.text);
+        : (isNext ? theme.accent : theme.text);
     final rowDecor = BoxDecoration(
-      color: isNext 
+      color: isCurrent 
           ? theme.accentBright.withOpacity(0.12) 
-          : (isCurrent ? theme.accent.withOpacity(0.08) : Colors.transparent),
+          : (isNext ? theme.accent.withOpacity(0.08) : Colors.transparent),
       borderRadius: BorderRadius.circular(8),
     );
 
@@ -303,11 +303,8 @@ class _ContentScreenState extends State<ContentScreen> {
             style: TextStyle(
               color: nameFg,
               fontSize: 18,
-              fontWeight: isNext ? FontWeight.w900 : (isCurrent ? FontWeight.w700 : FontWeight.w700),
+              fontWeight: isCurrent ? FontWeight.w900 : (isNext ? FontWeight.w700 : FontWeight.w700),
               letterSpacing: 1,
-              shadows: isNext ? [
-                Shadow(color: theme.accentBright.withOpacity(0.6), blurRadius: 12)
-              ] : null,
             )),
           const SizedBox(height: 2),
           _subscriptTime(p['adhan']!,  20, FontWeight.w700, theme, isNext: isNext, isCurrent: isCurrent),
@@ -318,9 +315,19 @@ class _ContentScreenState extends State<ContentScreen> {
   }
 
   Widget _jumuahBarItem(String time, ThemeConfig theme) {
-    final isNext = SharedData.instance.getNextPrayerIndex() == -2;
+    final currentIdx = SharedData.instance.getCurrentPrayerIndex();
+    final nextIdx = SharedData.instance.getNextPrayerIndex();
+    final isCurrent = currentIdx == -2;
+    final isNext = nextIdx == -2;
+    
+    final isHighlighted = isCurrent || isNext;
+    final highlightMain = isCurrent ? theme.accentBright : theme.accent;
+    final highlightWeight = isCurrent ? FontWeight.w900 : FontWeight.w700;
+
     final rowDecor = BoxDecoration(
-      color: isNext ? theme.accentBright.withOpacity(0.12) : Colors.transparent,
+      color: isHighlighted 
+          ? (isCurrent ? theme.accentBright.withOpacity(0.12) : theme.accent.withOpacity(0.10))
+          : Colors.transparent,
       borderRadius: BorderRadius.circular(8),
     );
 
@@ -333,15 +340,12 @@ class _ContentScreenState extends State<ContentScreen> {
         children: [
           Text("JUMU'AH", 
             style: TextStyle(
-              color: isNext ? theme.accentBright : theme.text, 
+              color: isHighlighted ? highlightMain : theme.text, 
               fontSize: 16, 
-              fontWeight: isNext ? FontWeight.w900 : FontWeight.w700, 
+              fontWeight: highlightWeight, 
               letterSpacing: 1,
-              shadows: isNext ? [
-                Shadow(color: theme.accentBright.withOpacity(0.6), blurRadius: 12)
-              ] : null,
             )),
-          _subscriptTime(time, 20, isNext ? FontWeight.w900 : FontWeight.w700, theme, isAccent: true, isNext: isNext),
+          _subscriptTime(time, 20, highlightWeight, theme, isAccent: true, isNext: isNext, isCurrent: isCurrent),
         ],
       ),
     );
@@ -356,10 +360,12 @@ class _ContentScreenState extends State<ContentScreen> {
   }
 
   Widget _subscriptTime(String time, double fontSize, FontWeight weight, ThemeConfig theme, {bool isAccent = false, bool isNext = false, bool isCurrent = false}) {
-    final cMain = isNext 
+    final cMain = isCurrent 
         ? theme.accentBright
-        : (isCurrent ? theme.accent : (isAccent ? theme.accentBright : theme.text));
-    final cSub = isAccent ? theme.accent : theme.textMuted;
+        : (isNext ? theme.accent : (isAccent ? theme.accentBright : theme.text));
+    final cSub = (isNext || isCurrent)
+        ? cMain
+        : (isAccent ? theme.accent : theme.textMuted);
     final sp = time.split(' ');
     return Row(
       mainAxisSize: MainAxisSize.min,

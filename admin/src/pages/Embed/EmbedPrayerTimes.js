@@ -7,11 +7,25 @@ const PRAYERS = ['fajr', 'zuhr', 'asr', 'maghrib', 'isha'];
 const LABELS = { fajr: 'Fajr', zuhr: 'Dhuhr', asr: 'Asr', maghrib: 'Maghrib', isha: 'Isha' };
 
 const to12 = (time) => {
-    if (!time || time.includes('AM') || time.includes('PM')) return time || '-';
-    const [h, m] = time.split(':').map(Number);
-    const hour = h > 12 ? h - 12 : (h === 0 ? 12 : h);
-    const period = h >= 12 ? 'PM' : 'AM';
-    return `${hour}:${String(m).padStart(2, '0')} ${period}`;
+    if (!time) return '-';
+    let h, m, period;
+    if (time.includes('AM') || time.includes('PM')) {
+        const parts = time.trim().split(' ');
+        const [hStr, mStr] = parts[0].split(':');
+        h = hStr;
+        m = mStr;
+        period = parts[1];
+    } else {
+        const [hourStr, minStr] = time.split(':').map(Number);
+        h = hourStr > 12 ? hourStr - 12 : (hourStr === 0 ? 12 : hourStr);
+        m = String(minStr).padStart(2, '0');
+        period = hourStr >= 12 ? 'PM' : 'AM';
+    }
+    return (
+        <span className="embed-time-wrapper">
+            {h}:{m} <span className="embed-time-suffix">{period}</span>
+        </span>
+    );
 };
 
 const parseTimeMins = (timeStr) => {
@@ -33,6 +47,14 @@ const formatDate = (dt) => {
     return `${days[dt.getDay()]}, ${months[dt.getMonth()]} ${dt.getDate()}, ${dt.getFullYear()}`;
 };
 
+const addMinutes = (timeStr, mins) => {
+    if (!timeStr) return '';
+    const total = parseTimeMins(timeStr) + mins;
+    const h = Math.floor(total / 60) % 24;
+    const m = total % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+};
+
 export default function EmbedPrayerTimes() {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [times, setTimes] = useState({});
@@ -52,7 +74,12 @@ export default function EmbedPrayerTimes() {
                 const { data } = await supabase.from('prayer_times').select('*');
                 if (data) {
                     const map = {};
-                    data.forEach(row => { map[row.prayer] = row; });
+                    data.forEach(row => { 
+                        if (row.prayer === 'maghrib' && row.adhan) {
+                            row.iqamah = addMinutes(row.adhan, 10);
+                        }
+                        map[row.prayer] = row; 
+                    });
                     setTimes(map);
                 }
             };
@@ -196,8 +223,13 @@ export default function EmbedPrayerTimes() {
             current = adhanMins[adhanMins.length - 1].prayer;
         }
 
+        // On Fridays, Zuhr adhan starts the Jumu'ah current window
+        if (isFriday && current === 'zuhr') {
+            current = 'jummah';
+        }
+
         // 2. Determine NEXT (based on first upcoming iqamah)
-        const iqamahCandidates = [...PRAYERS];
+        const iqamahCandidates = isFriday ? PRAYERS.filter(p => p !== 'zuhr') : [...PRAYERS];
         if (isFriday) {
             if (times['jummah']) iqamahCandidates.push('jummah');
             if (times['jummah_2']) iqamahCandidates.push('jummah_2');
