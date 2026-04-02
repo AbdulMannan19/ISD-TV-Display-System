@@ -236,27 +236,23 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
       margin: const EdgeInsets.symmetric(vertical: 6),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
         children: [
           Expanded(
             flex: 2,
-            child: Center(
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  p['name']!,
-                  style: TextStyle(
-                    color: nameFg,
-                    fontWeight: isCurrent ? FontWeight.w900 : (isNext ? FontWeight.w700 : FontWeight.bold),
-                    fontSize: 22,
-                    letterSpacing: 1.5,
-                  ),
-                ),
+            child: Text(
+              p['name']!,
+              style: TextStyle(
+                color: nameFg,
+                fontWeight: isCurrent ? FontWeight.w900 : (isNext ? FontWeight.w700 : FontWeight.bold),
+                fontSize: 22,
+                letterSpacing: 1.5,
               ),
             ),
           ),
-          Expanded(flex: 3, child: Center(child: _timeCell(p['adhan']!, theme, isNext: isNext, isCurrent: isCurrent))),
-          Expanded(flex: 3, child: Center(child: _timeCell(p['iqamah']!, theme, isAccent: true, isNext: isNext, isCurrent: isCurrent))),
+          Expanded(flex: 3, child: _timeCell(p['adhan']!, theme, isNext: isNext, isCurrent: isCurrent)),
+          Expanded(flex: 3, child: _timeCell(p['iqamah']!, theme, isAccent: true, isNext: isNext, isCurrent: isCurrent)),
         ],
       ),
     );
@@ -272,7 +268,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         : (isAccent ? theme.accent : theme.textMuted);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Text(
           sp[0],
@@ -286,9 +282,12 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           ),
         ),
         const SizedBox(width: 2),
-        Text(
-          sp.length > 1 ? sp[1] : '',
-          style: TextStyle(color: secColor, fontSize: 13),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: Text(
+            sp.length > 1 ? sp[1] : '',
+            style: TextStyle(color: secColor, fontSize: 13),
+          ),
         ),
       ],
     );
@@ -301,7 +300,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: theme.text.withOpacity(0.08)),
       ),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -390,7 +389,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _sunInfo('SUNRISE', SharedData.instance.sunrise, theme),
-              _sunInfo('SUNSET', SharedData.instance.sunset, theme),
               _sunInfo('LAST THIRD', SharedData.instance.lastThird, theme),
             ],
           ),
