@@ -69,10 +69,10 @@ class _ContentScreenState extends State<ContentScreen> {
   }
 
   double _dynamicFontSize(int length) {
-    if (length < 100) return 32;
-    if (length < 200) return 26;
-    if (length < 400) return 22;
-    return 18;
+    if (length < 100) return 44;
+    if (length < 200) return 40;
+    if (length < 400) return 36;
+    return 32;
   }
 
   @override
@@ -136,7 +136,7 @@ class _ContentScreenState extends State<ContentScreen> {
           Text(widget.title,
             textAlign: TextAlign.center,
             style: TextStyle(color: cardText.withOpacity(0.7),
-              fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 3)),
+              fontSize: 30, fontWeight: FontWeight.w700, letterSpacing: 3)),
           const SizedBox(height: 12),
           Expanded(
             child: Center(
@@ -157,7 +157,7 @@ class _ContentScreenState extends State<ContentScreen> {
             child: Text(content!['source']!,
               textAlign: TextAlign.center,
               style: TextStyle(color: cardText.withOpacity(0.8),
-                fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+                fontSize: 30, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
           ),
         ],
       ),
@@ -273,23 +273,9 @@ class _ContentScreenState extends State<ContentScreen> {
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Matches prayer name (fontSize 22)
-        SizedBox(height: 22 * 1.2, child: const SizedBox()),
+        Text('AZAN', style: TextStyle(color: theme.textMuted, fontSize: 24, fontWeight: FontWeight.w600, letterSpacing: 1)),
         const SizedBox(height: 2),
-        SizedBox(
-          height: 22 * 1.2,
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: Text('STARTS', style: TextStyle(color: theme.textMuted, fontSize: 24, fontWeight: FontWeight.w600, letterSpacing: 1)),
-          ),
-        ),
-        SizedBox(
-          height: 22 * 1.2,
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: Text('IQAMAH', style: TextStyle(color: theme.textMuted, fontSize: 24, fontWeight: FontWeight.w600, letterSpacing: 1)),
-          ),
-        ),
+        Text('IQAMAH', style: TextStyle(color: theme.textMuted, fontSize: 24, fontWeight: FontWeight.w600, letterSpacing: 1)),
       ],
     );
   }

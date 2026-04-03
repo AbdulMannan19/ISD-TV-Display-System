@@ -114,11 +114,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               Expanded(
                 flex: 3,
                 child: Text(
-                  'STARTS',
+                  'AZAN',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: theme.textMuted,
-                    fontSize: 14,
+                    fontSize: 18,
                     letterSpacing: 2,
                     fontWeight: FontWeight.w600,
                   ),
@@ -131,7 +131,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: theme.accent,
-                    fontSize: 14,
+                    fontSize: 18,
                     letterSpacing: 2,
                     fontWeight: FontWeight.w600,
                   ),
@@ -187,7 +187,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                 style: TextStyle(
                   color: isHighlighted ? highlightMain : theme.text,
                   fontWeight: highlightWeight,
-                  fontSize: 22,
+                  fontSize: 33,
                   letterSpacing: 1.5,
                 ),
               ),
@@ -247,7 +247,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               style: TextStyle(
                 color: nameFg,
                 fontWeight: isCurrent ? FontWeight.w900 : (isNext ? FontWeight.w700 : FontWeight.bold),
-                fontSize: 22,
+                fontSize: 33,
                 letterSpacing: 1.5,
               ),
             ),
@@ -275,7 +275,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           sp[0],
           style: TextStyle(
             color: primaryColor,
-            fontSize: 40,
+            fontSize: 50,
             fontWeight: isCurrent ? FontWeight.w900 : (isNext ? FontWeight.w700 : FontWeight.w600),
             shadows: (isAccent && !dimmed && theme.glowIntensity > 1.0 ? [
               Shadow(color: theme.accent, blurRadius: 10 * theme.glowIntensity)
@@ -410,7 +410,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           sp[0],
           style: TextStyle(
             color: theme.text,
-            fontSize: 88,
+            fontSize: 65,
             fontWeight: FontWeight.w700,
             letterSpacing: -1,
           ),
@@ -437,13 +437,13 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           label,
           style: TextStyle(
             color: theme.textMuted,
-            fontSize: 23,
+            fontSize: 10,
             letterSpacing: 1.5,
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 2),
-        _subscriptTime(time, 24, FontWeight.w600, theme),
+        _subscriptTime(time, 30, FontWeight.w600, theme),
       ],
     );
   }
