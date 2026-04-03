@@ -118,7 +118,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: theme.textMuted,
-                    fontSize: 15,
+                    fontSize: 18,
                     letterSpacing: 2,
                     fontWeight: FontWeight.w600,
                   ),
@@ -131,7 +131,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: theme.accent,
-                    fontSize: 15,
+                    fontSize: 18,
                     letterSpacing: 2,
                     fontWeight: FontWeight.w600,
                   ),
@@ -194,7 +194,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               const SizedBox(width: 20),
               _subscriptTime(
                 SharedData.instance.jummah, 
-                26, 
+                32, 
                 highlightWeight, 
                 theme, 
                 isAccent: true,
@@ -339,7 +339,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               Text(
                 _formatDate(_now),
                 style: TextStyle(
-                  color: theme.accentBright.withOpacity(0.8),
+                  color: theme.accentBright,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),

@@ -172,21 +172,21 @@ class _ContentScreenState extends State<ContentScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: theme.text.withOpacity(0.08)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 8),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Mosque name + date block
           Column(children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
               decoration: BoxDecoration(border: Border.all(color: theme.text.withOpacity(0.2)), borderRadius: BorderRadius.circular(8)),
               child: Text('Islamic Society of Denton', textAlign: TextAlign.center,
-                style: TextStyle(color: theme.accentBright, fontSize: 13, fontWeight: FontWeight.w600)),
+                style: TextStyle(color: theme.accentBright, fontSize: 17, fontWeight: FontWeight.w600)),
             ),
             const SizedBox(height: 8),
             Text(_formatDate(_now), textAlign: TextAlign.center,
-              style: TextStyle(color: theme.accentBright.withOpacity(0.8), fontSize: 16, letterSpacing: 0.5, fontWeight: FontWeight.w600)),
+              style: TextStyle(color: theme.accentBright, fontSize: 16, letterSpacing: 0.5, fontWeight: FontWeight.w600)),
             if (shared.hijriDate.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
@@ -208,10 +208,10 @@ class _ContentScreenState extends State<ContentScreen> {
             decoration: BoxDecoration(color: theme.accent.withOpacity(0.06), borderRadius: BorderRadius.circular(12)),
             child: Column(children: [
               Text('${shared.getNextPrayerName()} IQAMA IN',
-                style: TextStyle(color: theme.textMuted, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.5)),
+                style: TextStyle(color: theme.textMuted, fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 1.5)),
               const SizedBox(height: 2),
               Text(shared.getCountdown(),
-                style: TextStyle(color: theme.accentBright, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                style: TextStyle(color: theme.accentBright, fontSize: 26, fontWeight: FontWeight.bold, letterSpacing: 1)),
             ]),
           ),
         ],
@@ -268,12 +268,20 @@ class _ContentScreenState extends State<ContentScreen> {
   }
 
   Widget _prayerBarHeader(ThemeConfig theme) {
+    // Invisible placeholder matches prayer name height so AZAN/IQAMAH
+    // line up with the adhan and iqamah time rows below it.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('AZAN', style: TextStyle(color: theme.textMuted, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 1)),
-        const SizedBox(height: 26),
+        // invisible spacer = prayer name row height (14px font)
+        Opacity(
+          opacity: 0,
+          child: Text('X', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+        ),
+        const SizedBox(height: 2),
+        Text('AZAN',   style: TextStyle(color: theme.textMuted, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 1)),
+        const SizedBox(height: 22),
         Text('IQAMAH', style: TextStyle(color: theme.textMuted, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 1)),
       ],
     );
@@ -367,9 +375,9 @@ class _ContentScreenState extends State<ContentScreen> {
 
   Widget _sunInfo(String label, String time, ThemeConfig theme) {
     return Column(children: [
-      Text(label, style: TextStyle(color: theme.textMuted, fontSize: 15, letterSpacing: 1.5, fontWeight: FontWeight.w600)),
+      Text(label, style: TextStyle(color: theme.textMuted, fontSize: 11, letterSpacing: 1.2, fontWeight: FontWeight.w600)),
       const SizedBox(height: 2),
-      _subscriptTime(time, 24, FontWeight.w600, theme),
+      _subscriptTime(time, 22, FontWeight.w600, theme),
     ]);
   }
 
