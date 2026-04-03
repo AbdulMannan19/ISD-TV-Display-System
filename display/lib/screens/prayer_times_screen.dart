@@ -410,7 +410,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           sp[0],
           style: TextStyle(
             color: theme.text,
-            fontSize: 58,
+            fontSize: 88,
             fontWeight: FontWeight.w700,
             letterSpacing: -1,
           ),
@@ -421,7 +421,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
             sp.length > 1 ? sp[1] : '',
             style: TextStyle(
               color: theme.textMuted,
-              fontSize: 20,
+              fontSize: 30,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -437,7 +437,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           label,
           style: TextStyle(
             color: theme.textMuted,
-            fontSize: 13,
+            fontSize: 23,
             letterSpacing: 1.5,
             fontWeight: FontWeight.w600,
           ),
