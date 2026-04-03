@@ -61,7 +61,7 @@ Future<void> _performStorageHealthCheck() async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Run self-healing check before any other services start
+  // Run self-healing check before any other services startd
   await _performStorageHealthCheck();
   
   try {
