@@ -2,7 +2,7 @@ git status
 git add .
 git commit -m "quick commit"
 git push
-clea
+clear
 
 cd display
 flutter run -d windows
