@@ -69,10 +69,10 @@ class _ContentScreenState extends State<ContentScreen> {
   }
 
   double _dynamicFontSize(int length) {
-    if (length < 100) return 44;
-    if (length < 200) return 40;
-    if (length < 400) return 36;
-    return 32;
+    if (length < 100) return 38;
+    if (length < 200) return 34;
+    if (length < 400) return 30;
+    return 26;
   }
 
   @override
@@ -136,7 +136,7 @@ class _ContentScreenState extends State<ContentScreen> {
           Text(widget.title,
             textAlign: TextAlign.center,
             style: TextStyle(color: cardText.withOpacity(0.7),
-              fontSize: 30, fontWeight: FontWeight.w700, letterSpacing: 3)),
+              fontSize: 24, fontWeight: FontWeight.w700, letterSpacing: 3)),
           const SizedBox(height: 12),
           Expanded(
             child: Center(
@@ -157,7 +157,7 @@ class _ContentScreenState extends State<ContentScreen> {
             child: Text(content!['source']!,
               textAlign: TextAlign.center,
               style: TextStyle(color: cardText.withOpacity(0.8),
-                fontSize: 30, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+                fontSize: 24, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
           ),
         ],
       ),
@@ -182,16 +182,16 @@ class _ContentScreenState extends State<ContentScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(border: Border.all(color: theme.text.withOpacity(0.2)), borderRadius: BorderRadius.circular(8)),
               child: Text('Islamic Society of Denton', textAlign: TextAlign.center,
-                style: TextStyle(color: theme.accentBright, fontSize: 26, fontWeight: FontWeight.w600)),
+                style: TextStyle(color: theme.accentBright, fontSize: 13, fontWeight: FontWeight.w600)),
             ),
             const SizedBox(height: 8),
             Text(_formatDate(_now), textAlign: TextAlign.center,
-              style: TextStyle(color: theme.accentBright.withOpacity(0.8), fontSize: 20, letterSpacing: 0.5, fontWeight: FontWeight.w600)),
+              style: TextStyle(color: theme.accentBright.withOpacity(0.8), fontSize: 16, letterSpacing: 0.5, fontWeight: FontWeight.w600)),
             if (shared.hijriDate.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(shared.hijriDate, textAlign: TextAlign.center,
-                  style: TextStyle(color: theme.accentBright, fontSize: 22, letterSpacing: 0.5, fontWeight: FontWeight.w600)),
+                  style: TextStyle(color: theme.accentBright, fontSize: 18, letterSpacing: 0.5, fontWeight: FontWeight.w600)),
               ),
           ]),
           // Clock
@@ -199,20 +199,19 @@ class _ContentScreenState extends State<ContentScreen> {
           // Sunrise / Sunset / Last Third
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             _sunInfo('SUNRISE', shared.sunrise, theme),
-            _sunInfo('SUNSET', shared.sunset, theme),
             _sunInfo('LAST THIRD', shared.lastThird, theme),
           ]),
           // Iqama countdown
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(color: theme.accent.withOpacity(0.06), borderRadius: BorderRadius.circular(12)),
             child: Column(children: [
               Text('${shared.getNextPrayerName()} IQAMA IN',
-                style: TextStyle(color: theme.textMuted, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 2)),
-              const SizedBox(height: 6),
+                style: TextStyle(color: theme.textMuted, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.5)),
+              const SizedBox(height: 2),
               Text(shared.getCountdown(),
-                style: TextStyle(color: theme.accentBright, fontSize: 36, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                style: TextStyle(color: theme.accentBright, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 1)),
             ]),
           ),
         ],
@@ -228,11 +227,11 @@ class _ContentScreenState extends State<ContentScreen> {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Text(sp[0],
-          style: TextStyle(color: theme.text, fontSize: 58, fontWeight: FontWeight.w700, letterSpacing: -1)),
+          style: TextStyle(color: theme.text, fontSize: 44, fontWeight: FontWeight.w700, letterSpacing: -1)),
         Padding(
           padding: const EdgeInsets.only(bottom: 6, left: 4),
           child: Text(sp.length > 1 ? sp[1] : '',
-            style: TextStyle(color: theme.textMuted, fontSize: 20, fontWeight: FontWeight.w500)),
+            style: TextStyle(color: theme.textMuted, fontSize: 16, fontWeight: FontWeight.w500)),
         ),
       ],
     );
@@ -242,7 +241,7 @@ class _ContentScreenState extends State<ContentScreen> {
     final shared = SharedData.instance;
     if (shared.prayers.isEmpty) return const SizedBox();
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
       decoration: BoxDecoration(
         color: theme.text.withOpacity(0.04),
         borderRadius: BorderRadius.circular(12),
@@ -273,9 +272,9 @@ class _ContentScreenState extends State<ContentScreen> {
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('AZAN', style: TextStyle(color: theme.textMuted, fontSize: 24, fontWeight: FontWeight.w600, letterSpacing: 1)),
-        const SizedBox(height: 30),
-        Text('IQAMAH', style: TextStyle(color: theme.textMuted, fontSize: 24, fontWeight: FontWeight.w600, letterSpacing: 1)),
+        Text('AZAN', style: TextStyle(color: theme.textMuted, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 1)),
+        const SizedBox(height: 26),
+        Text('IQAMAH', style: TextStyle(color: theme.textMuted, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 1)),
       ],
     );
   }
@@ -298,8 +297,8 @@ class _ContentScreenState extends State<ContentScreen> {
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 400),
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: rowDecor,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -307,13 +306,13 @@ class _ContentScreenState extends State<ContentScreen> {
           Text(p['name']!,
             style: TextStyle(
               color: nameFg,
-              fontSize: 22,
+              fontSize: 14,
               fontWeight: isCurrent ? FontWeight.w900 : (isNext ? FontWeight.w700 : FontWeight.w700),
-              letterSpacing: 1,
+              letterSpacing: 0.5,
             )),
           const SizedBox(height: 2),
-          _subscriptTime(p['adhan']!,  42, FontWeight.w700, theme, isNext: isNext, isCurrent: isCurrent),
-          _subscriptTime(p['iqamah']!, 42, FontWeight.w700, theme, isAccent: true, isNext: isNext, isCurrent: isCurrent),
+          _subscriptTime(p['adhan']!,  30, FontWeight.w700, theme, isNext: isNext, isCurrent: isCurrent),
+          _subscriptTime(p['iqamah']!, 30, FontWeight.w700, theme, isAccent: true, isNext: isNext, isCurrent: isCurrent),
         ],
       ),
     );
@@ -349,11 +348,11 @@ class _ContentScreenState extends State<ContentScreen> {
               Text("JUMU'AH", 
                 style: TextStyle(
                   color: isHighlighted ? highlightMain : theme.text, 
-                  fontSize: 22, 
+                  fontSize: 14, 
                   fontWeight: highlightWeight, 
-                  letterSpacing: 1,
+                  letterSpacing: 0.5,
                 )),
-              _subscriptTime(time, 42, highlightWeight, theme, isAccent: true, isNext: isNext, isCurrent: isCurrent),
+              _subscriptTime(time, 30, highlightWeight, theme, isAccent: true, isNext: isNext, isCurrent: isCurrent),
             ],
           ),
           const SizedBox(width: 8),

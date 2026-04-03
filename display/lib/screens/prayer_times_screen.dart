@@ -118,7 +118,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: theme.textMuted,
-                    fontSize: 18,
+                    fontSize: 15,
                     letterSpacing: 2,
                     fontWeight: FontWeight.w600,
                   ),
@@ -131,7 +131,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: theme.accent,
-                    fontSize: 18,
+                    fontSize: 15,
                     letterSpacing: 2,
                     fontWeight: FontWeight.w600,
                   ),
@@ -187,14 +187,14 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                 style: TextStyle(
                   color: isHighlighted ? highlightMain : theme.text,
                   fontWeight: highlightWeight,
-                  fontSize: 33,
+                  fontSize: 26,
                   letterSpacing: 1.5,
                 ),
               ),
               const SizedBox(width: 20),
               _subscriptTime(
                 SharedData.instance.jummah, 
-                33, 
+                26, 
                 highlightWeight, 
                 theme, 
                 isAccent: true,
@@ -247,7 +247,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               style: TextStyle(
                 color: nameFg,
                 fontWeight: isCurrent ? FontWeight.w900 : (isNext ? FontWeight.w700 : FontWeight.bold),
-                fontSize: 33,
+                fontSize: 24,
                 letterSpacing: 1.5,
               ),
             ),
@@ -275,7 +275,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           sp[0],
           style: TextStyle(
             color: primaryColor,
-            fontSize: 50,
+            fontSize: 42,
             fontWeight: isCurrent ? FontWeight.w900 : (isNext ? FontWeight.w700 : FontWeight.w600),
             shadows: (isAccent && !dimmed && theme.glowIntensity > 1.0 ? [
               Shadow(color: theme.accent, blurRadius: 10 * theme.glowIntensity)
@@ -330,7 +330,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: theme.accentBright,
-                    fontSize: 26,
+                    fontSize: 20,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -340,7 +340,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                 _formatDate(_now),
                 style: TextStyle(
                   color: theme.accentBright.withOpacity(0.8),
-                  fontSize: 20,
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -351,7 +351,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   SharedData.instance.hijriDate,
                   style: TextStyle(
                     color: theme.accentBright,
-                    fontSize: 22,
+                    fontSize: 18,
                     fontWeight: FontWeight.w600,
                   )),
                 ),
@@ -372,7 +372,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   '${SharedData.instance.getNextPrayerName()} IQAMA IN',
                   style: TextStyle(
                     color: theme.textMuted,
-                    fontSize: 16,
+                    fontSize: 13,
                     letterSpacing: 2,
                     fontWeight: FontWeight.w700,
                   ),
@@ -382,7 +382,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   SharedData.instance.getCountdown(),
                   style: TextStyle(
                     color: theme.accentBright,
-                    fontSize: 36,
+                    fontSize: 30,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -414,7 +414,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           sp[0],
           style: TextStyle(
             color: theme.text,
-            fontSize: 65,
+            fontSize: 55,
             fontWeight: FontWeight.w700,
             letterSpacing: -1,
           ),
@@ -425,7 +425,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
             sp.length > 1 ? sp[1] : '',
             style: TextStyle(
               color: theme.textMuted,
-              fontSize: 30,
+              fontSize: 24,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -441,13 +441,13 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           label,
           style: TextStyle(
             color: theme.textMuted,
-            fontSize: 15,
+            fontSize: 12,
             letterSpacing: 1.5,
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 2),
-        _subscriptTime(time, 30, FontWeight.w600, theme),
+        _subscriptTime(time, 24, FontWeight.w600, theme),
       ],
     );
   }
