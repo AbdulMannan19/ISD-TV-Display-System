@@ -182,16 +182,16 @@ class _ContentScreenState extends State<ContentScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(border: Border.all(color: theme.text.withOpacity(0.2)), borderRadius: BorderRadius.circular(8)),
               child: Text('Islamic Society of Denton', textAlign: TextAlign.center,
-                style: TextStyle(color: theme.accentBright, fontSize: 16, fontWeight: FontWeight.w600)),
+                style: TextStyle(color: theme.accentBright, fontSize: 26, fontWeight: FontWeight.w600)),
             ),
             const SizedBox(height: 8),
             Text(_formatDate(_now), textAlign: TextAlign.center,
-              style: TextStyle(color: theme.textMuted, fontSize: 15, letterSpacing: 0.5)),
+              style: TextStyle(color: theme.accentBright.withOpacity(0.8), fontSize: 20, letterSpacing: 0.5, fontWeight: FontWeight.w600)),
             if (shared.hijriDate.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(shared.hijriDate, textAlign: TextAlign.center,
-                  style: TextStyle(color: theme.textMuted.withOpacity(0.8), fontSize: 14, letterSpacing: 0.5)),
+                  style: TextStyle(color: theme.accentBright, fontSize: 22, letterSpacing: 0.5, fontWeight: FontWeight.w600)),
               ),
           ]),
           // Clock
@@ -368,7 +368,7 @@ class _ContentScreenState extends State<ContentScreen> {
 
   Widget _sunInfo(String label, String time, ThemeConfig theme) {
     return Column(children: [
-      Text(label, style: TextStyle(color: theme.textMuted, fontSize: 13, letterSpacing: 1.5, fontWeight: FontWeight.w600)),
+      Text(label, style: TextStyle(color: theme.textMuted, fontSize: 15, letterSpacing: 1.5, fontWeight: FontWeight.w600)),
       const SizedBox(height: 2),
       _subscriptTime(time, 24, FontWeight.w600, theme),
     ]);

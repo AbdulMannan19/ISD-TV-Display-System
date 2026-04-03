@@ -330,7 +330,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: theme.accentBright,
-                    fontSize: 17,
+                    fontSize: 26,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -339,17 +339,21 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               Text(
                 _formatDate(_now),
                 style: TextStyle(
-                  color: theme.textMuted,
-                  fontSize: 14,
+                  color: theme.accentBright.withOpacity(0.8),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               if (SharedData.instance.hijriDate.isNotEmpty)
-                Text(
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
                   SharedData.instance.hijriDate,
                   style: TextStyle(
-                    color: theme.textMuted.withOpacity(0.8),
-                    fontSize: 13,
-                  ),
+                    color: theme.accentBright,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                  )),
                 ),
             ],
           ),
@@ -437,7 +441,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           label,
           style: TextStyle(
             color: theme.textMuted,
-            fontSize: 10,
+            fontSize: 15,
             letterSpacing: 1.5,
             fontWeight: FontWeight.w600,
           ),
