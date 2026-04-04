@@ -648,7 +648,7 @@ class _AlertMarqueeState extends State<_AlertMarquee>
       _childWidth = renderBox.size.width;
     }
     final totalDistance = _screenWidth + _childWidth;
-    final durationMs = (totalDistance / 50 * 1000).toInt();
+    final durationMs = (totalDistance / 30 * 1000).toInt();
     _controller.duration = Duration(milliseconds: durationMs);
     _controller.repeat();
   }
@@ -686,7 +686,7 @@ class _AlertMarqueeState extends State<_AlertMarquee>
             softWrap: false,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 27,
+              fontSize: 23,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
               decoration: TextDecoration.none,
