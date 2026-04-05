@@ -52,4 +52,35 @@ class IqamahScheduleService {
       }
     } catch (_) {}
   }
+
+  /// Look ahead to tomorrow's scheduled changes and apply them now.
+  /// Called after a prayer's silence ends so the display immediately
+  /// shows the next occurrence's iqamah time.
+  static Future<void> applyLookaheadChanges() async {
+    try {
+      final tomorrow = DateTime.now().add(const Duration(days: 1));
+      final tomorrowStr = '${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}';
+
+      final response = await _supabase
+          .from('iqamah_schedule')
+          .select('*')
+          .eq('effective_date', tomorrowStr);
+
+      final rows = response as List;
+      if (rows.isEmpty) return;
+
+      for (final row in rows) {
+        final prayer = row['prayer'] as String;
+        final iqamah = row['iqamah'] as String;
+        final id = row['id'];
+
+        await _supabase
+            .from('prayer_times')
+            .update({'iqamah': iqamah})
+            .eq('prayer', prayer);
+
+        await _supabase.from('iqamah_schedule').delete().eq('id', id);
+      }
+    } catch (_) {}
+  }
 }

@@ -83,6 +83,7 @@ Future<void> main() async {
   try {
     // Apply any scheduled Iqamah changes before app starts
     await IqamahScheduleService.applyScheduledChanges();
+    await IqamahScheduleService.applyLookaheadChanges();
   } catch (_) {}
 
   runApp(const DisplayApp());
@@ -147,6 +148,7 @@ class _StartupGateState extends State<StartupGate> {
             // 4. Scheduled changes
             try {
               await IqamahScheduleService.applyScheduledChanges();
+              await IqamahScheduleService.applyLookaheadChanges();
             } catch (_) {}
 
             if (mounted) {
@@ -336,8 +338,8 @@ class _ScreenRotatorState extends State<ScreenRotator> {
     if (refreshTime.isBefore(now)) return;
 
     _maghribRefreshTimer = Timer(refreshTime.difference(now), () async {
-      // Hijri date changes at sunset — fetch new daily content
-      await SharedData.instance.init();
+      // Hijri date changes at sunset — bump locally (Aladhan only updates at midnight)
+      SharedData.instance.bumpHijriDay();
       await SharedData.instance.fetchDailyContent();
       if (mounted) setState(() {});
     });
@@ -648,7 +650,7 @@ class _AlertMarqueeState extends State<_AlertMarquee>
       _childWidth = renderBox.size.width;
     }
     final totalDistance = _screenWidth + _childWidth;
-    final durationMs = (totalDistance / 30 * 1000).toInt();
+    final durationMs = (totalDistance / 20 * 1000).toInt();
     _controller.duration = Duration(milliseconds: durationMs);
     _controller.repeat();
   }
