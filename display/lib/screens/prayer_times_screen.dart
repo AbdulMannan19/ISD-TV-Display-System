@@ -367,7 +367,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
             child: Column(
               children: [
                 Text(
-                  '${SharedData.instance.getNextPrayerName()} IQAMA IN',
+                  '${SharedData.instance.getNextPrayerName()} IQAMAH IN',
                   style: TextStyle(
                     color: theme.textMuted,
                     fontSize: 13,

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
 import 'shared_data.dart';
-import 'iqamah_schedule_service.dart';
 
 enum DisplayMode { normal, silence, prohibited, iqamahLock }
 
@@ -102,7 +101,6 @@ class DisplayModeService {
       mode = DisplayMode.normal;
       silenceEndTime = null;
       _onModeChanged?.call();
-      _applyLookaheadAndRefresh();
       scheduleIqamahLock();
       return;
     }
@@ -111,7 +109,6 @@ class DisplayModeService {
       mode = DisplayMode.normal;
       silenceEndTime = null;
       _onModeChanged?.call();
-      _applyLookaheadAndRefresh();
       scheduleIqamahLock();
     });
   }
@@ -276,16 +273,6 @@ class DisplayModeService {
     silenceEndTime = now.add(Duration(minutes: duration));
     _onModeChanged?.call();
     _scheduleSilenceExit();
-  }
-
-  /// After silence ends, apply any tomorrow-scheduled iqamah changes
-  /// so the display immediately reflects the next prayer occurrence.
-  Future<void> _applyLookaheadAndRefresh() async {
-    try {
-      await IqamahScheduleService.applyLookaheadChanges();
-      await SharedData.instance.refreshIqamah();
-      _onModeChanged?.call();
-    } catch (_) {}
   }
 
   void exitSpecialMode() {

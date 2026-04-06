@@ -139,9 +139,9 @@ class _StartupGateState extends State<StartupGate> {
           final contentSuccess = await SharedData.instance.fetchDailyContent();
           
           if (contentSuccess) {
-            // 4. Apply lookahead scheduled changes
+            // 4. Apply scheduled changes
             try {
-              await IqamahScheduleService.applyLookaheadChanges();
+              await IqamahScheduleService.applyScheduledChanges();
             } catch (_) {}
 
             if (mounted) {
@@ -312,6 +312,7 @@ class _ScreenRotatorState extends State<ScreenRotator> {
   }
 
   Future<void> _refreshAtMidnight() async {
+    await IqamahScheduleService.applyScheduledChanges();
     await SharedData.instance.init();
     _displayMode.scheduleProhibited();
     _displayMode.scheduleIqamahLock();
@@ -655,38 +656,42 @@ class _AlertMarqueeState extends State<_AlertMarquee>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final totalDistance = _screenWidth + _childWidth;
-        final dx = _screenWidth - _controller.value * totalDistance;
-        return Transform.translate(
-          offset: Offset(dx, 0),
-          child: child,
-        );
-      },
-      child: UnconstrainedBox(
-        alignment: Alignment.centerLeft,
-        child: Container(
-          key: _childKey,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.red.shade800,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Text(
-            widget.text,
-            maxLines: 1,
-            softWrap: false,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 23,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
-              decoration: TextDecoration.none,
-            ),
+    final child = UnconstrainedBox(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        key: _childKey,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.red.shade800,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          widget.text,
+          maxLines: 1,
+          softWrap: false,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 23,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+            decoration: TextDecoration.none,
           ),
         ),
+      ),
+    );
+
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          final totalDistance = _screenWidth + _childWidth;
+          final dx = _screenWidth - _controller.value * totalDistance;
+          return Transform(
+            transform: Matrix4.translationValues(dx, 0, 0),
+            child: child,
+          );
+        },
+        child: child,
       ),
     );
   }
